@@ -18,7 +18,7 @@ const Navbar = () => {
       <div className="">
         <p className=" text-center leading-3.5 text-[15px] font-bold ">
           Tekshirilgani, To'g'ri Tanlov <br />
-          <span className=" text-[9px]">Ishinchliy Bozor</span>
+          <span className=" text-[9px]">Ishonchliy Bozor</span>
         </p>
       </div>
       {/* links */}
