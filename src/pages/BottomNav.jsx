@@ -42,7 +42,7 @@ const BottomNav = () => {
         <div className="flex-1 flex justify-center items-center relative -top-4">
           <NavLink
             to="/sell"
-            className="w-13 h-13 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-full flex flex-col items-center justify-center text-white shadow-lg shadow-blue-500/30 hover:scale-105 active:scale-95 transition-all duration-200 border-4 border-slate-50"
+            className="w-13 h-13 bg-linear-to-tr from-blue-600 to-indigo-500 rounded-full flex flex-col items-center justify-center text-white shadow-lg shadow-blue-500/30 hover:scale-105 active:scale-95 transition-all duration-200 border-4 border-slate-50"
           >
             <LuPlus className="text-2xl" />
           </NavLink>

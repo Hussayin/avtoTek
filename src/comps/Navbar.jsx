@@ -11,8 +11,15 @@ const Navbar = () => {
       {/* Logo */}
       <div className=" flex justify-center items-center gap-1.25 ">
         <div>
-          <img className=" h-13" src={brendLogo} alt="" />
+          <img className=" h-14.5" src={brendLogo} alt="" />
         </div>
+      </div>
+      {/* text */}
+      <div className="">
+        <p className=" text-center leading-3.5 text-[15px] font-bold ">
+          Tekshirilgani, To'g'ri Tanlov <br />
+          <span className=" text-[9px]">Ishinchliy Bozor</span>
+        </p>
       </div>
       {/* links */}
       <div>
