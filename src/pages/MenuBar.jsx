@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { LuCar, LuPlus, LuGavel, LuCalculator } from "react-icons/lu";
+import { LiaCalculatorSolid } from "react-icons/lia";
 
 const MenuBar = () => {
   // Menyu elementlari ro'yxati
@@ -31,11 +32,15 @@ const MenuBar = () => {
     },
     {
       id: 4,
-      title: "Baholash",
+      title: "Muddatliy to'lov",
+      images:
+        "https://media.istockphoto.com/id/1364094307/vector/halal-vector-symbol-package-sticker-for-food-or-product-isolated-on-white.jpg?s=612x612&w=0&k=20&c=rnnHkTgNFJjcx2oKrM3XjWPRf-alil0D6Ev59BLAARA=",
       icon: LuCalculator,
       path: "/valuation",
       bgColor: "bg-blue-50",
       iconColor: "text-blue-600",
+      highte: "h-[30px]",
+      display: "display-hide",
     },
   ];
 
@@ -47,7 +52,7 @@ const MenuBar = () => {
       */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {menuItems.map((item) => {
-          const IconComponent = item.icon;
+          // const IconComponent = item.icon;
           return (
             <Link
               key={item.id}
@@ -58,7 +63,10 @@ const MenuBar = () => {
               <div
                 className={`w-12 h-12 rounded-full flex items-center justify-center mb-2.5 ${item.bgColor} group-hover:scale-110 transition-transform duration-200`}
               >
-                <IconComponent className={`text-2xl ${item.iconColor}`} />
+                <img src={item.images} alt="" />
+                <item.icon
+                  className={`text-2xl ${item.iconColor} ${item.display}`}
+                />
               </div>
 
               {/* Sarlavha */}
