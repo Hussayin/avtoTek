@@ -4,6 +4,7 @@ import { Routes, Route } from "react-router-dom";
 // Komponent va Sahifalarni import qilish
 import Home from "./pages/Home";
 import BottomNav from "./pages/BottomNav";
+import About from "./pages/About";
 
 const App = () => {
   return (
@@ -11,6 +12,7 @@ const App = () => {
       {/* Sahifalar almashadigan joy */}
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
         <Route
           path="/market"
           element={<div className="p-4">Bozor sahifasi</div>}

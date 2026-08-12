@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { FaTelegramPlane } from "react-icons/fa";
+import { FaInstagram } from "react-icons/fa6";
 
 // logo
 import brendLogo from "../assets/brendLogo.png";
@@ -33,7 +35,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="flex justify-between items-center px-3.5 py-2.5 bg-white border-b border-slate-200 sticky top-0 z-40">
+      <nav className="flex justify-between items-center px-3.5 py-2.5 bg-white border-b border-slate-200  top-0 z-40">
         {/* Logo */}
         <div className="flex justify-center items-center gap-1.25">
           <Link to="/">
@@ -73,7 +75,7 @@ const Navbar = () => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               onClick={() => setIsOpen(false)}
-              className="fixed inset-0 z-[100000] bg-slate-900/50 backdrop-blur-sm"
+              className="fixed inset-0 z-100000 bg-slate-900/50 backdrop-blur-sm"
             />
 
             {/* O'ng tarafdan chiquvchi Oyna (Sidebar) */}
@@ -82,7 +84,7 @@ const Navbar = () => {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 z-[10000000] w-72 h-full bg-white shadow-2xl flex flex-col justify-between"
+              className="fixed top-0 right-0 z-10000000 w-72 h-full bg-white shadow-2xl flex flex-col justify-between"
             >
               <div>
                 {/* Header: Sarlavha va Yopish tugmasi */}
@@ -162,15 +164,47 @@ const Navbar = () => {
                 </div>
               </div>
 
-              {/* Pastki qism: Bog'lanish */}
-              <div className="p-4 border-t border-slate-100 bg-slate-50">
-                <a
-                  href="tel:+998901234567"
-                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm shadow-md shadow-blue-500/20 active:scale-95 transition-all"
-                >
-                  <LuPhoneCall size={18} />
-                  <span>Aloqaga chiqish</span>
-                </a>
+              <div className=" flex flex-col gap-2.5 px-5 mb-5 ">
+                {/* Pastki qism: Bog'lanish */}
+                <div className=" border-t border-slate-100 bg-slate-50">
+                  <a
+                    href="tel:+998901234567"
+                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm shadow-md shadow-blue-500/20 active:scale-95 transition-all"
+                  >
+                    <FaTelegramPlane size={18} />
+                    <span>Telegram</span>
+                  </a>
+                </div>
+                {/* Pastki qism: Bog'lanish */}
+                <div className=" border-t border-slate-100 bg-slate-50">
+                  <a
+                    href="tel:+998901234567"
+                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm shadow-md shadow-blue-500/20 active:scale-95 transition-all"
+                  >
+                    <FaTelegramPlane size={18} />
+                    <span>Telegram Admin</span>
+                  </a>
+                </div>
+                {/* Pastki qism: Bog'lanish */}
+                <div className=" border-t border-slate-100 bg-slate-50">
+                  <a
+                    href="tel:+998901234567"
+                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm shadow-md shadow-blue-500/20 active:scale-95 transition-all"
+                  >
+                    <FaInstagram size={18} />
+                    <span>Instagram</span>
+                  </a>
+                </div>
+                {/* Pastki qism: Bog'lanish */}
+                <div className=" border-t border-slate-100 bg-slate-50">
+                  <a
+                    href="tel:+998901234567"
+                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm shadow-md shadow-blue-500/20 active:scale-95 transition-all"
+                  >
+                    <LuPhoneCall size={18} />
+                    <span>Aloqaga chiqish</span>
+                  </a>
+                </div>
               </div>
             </motion.aside>
           </>
