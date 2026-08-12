@@ -68,7 +68,7 @@ const MenuBar = () => {
             className={`rounded-full flex items-center justify-center mb-2.5 group-hover:scale-110 transition-transform duration-200`}
           >
             <img
-              className=" h-[65px] "
+              className=" h-13.75 "
               src="https://media.istockphoto.com/id/1364094307/vector/halal-vector-symbol-package-sticker-for-food-or-product-isolated-on-white.jpg?s=612x612&w=0&k=20&c=rnnHkTgNFJjcx2oKrM3XjWPRf-alil0D6Ev59BLAARA="
               alt="Halol Icon"
             />
