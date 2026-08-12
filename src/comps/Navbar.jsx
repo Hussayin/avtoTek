@@ -168,7 +168,7 @@ const Navbar = () => {
                 {/* Pastki qism: Bog'lanish */}
                 <div className=" border-t border-slate-100 bg-slate-50">
                   <a
-                    href="tel:+998901234567"
+                    href="https://t.me/avtotekuz"
                     className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm shadow-md shadow-blue-500/20 active:scale-95 transition-all"
                   >
                     <FaTelegramPlane size={18} />
@@ -178,7 +178,7 @@ const Navbar = () => {
                 {/* Pastki qism: Bog'lanish */}
                 <div className=" border-t border-slate-100 bg-slate-50">
                   <a
-                    href="tel:+998901234567"
+                    href="https://t.me/xusan728"
                     className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm shadow-md shadow-blue-500/20 active:scale-95 transition-all"
                   >
                     <FaTelegramPlane size={18} />
@@ -188,7 +188,7 @@ const Navbar = () => {
                 {/* Pastki qism: Bog'lanish */}
                 <div className=" border-t border-slate-100 bg-slate-50">
                   <a
-                    href="tel:+998901234567"
+                    href="https://www.instagram.com/avtotek.uz/"
                     className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm shadow-md shadow-blue-500/20 active:scale-95 transition-all"
                   >
                     <FaInstagram size={18} />
@@ -198,11 +198,11 @@ const Navbar = () => {
                 {/* Pastki qism: Bog'lanish */}
                 <div className=" border-t border-slate-100 bg-slate-50">
                   <a
-                    href="tel:+998901234567"
+                    href="tel:+998900770728"
                     className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm shadow-md shadow-blue-500/20 active:scale-95 transition-all"
                   >
                     <LuPhoneCall size={18} />
-                    <span>Aloqaga chiqish</span>
+                    <span>+998-90-077-07-28</span>
                   </a>
                 </div>
               </div>

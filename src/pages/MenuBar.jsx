@@ -28,7 +28,7 @@ const MenuBar = () => {
           </span>
         </NavLink>
         <NavLink
-          to="/buy"
+          to="/sell"
           className="flex  flex-col items-center justify-center p-3 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md active:scale-95 transition-all duration-200 group"
         >
           {/* Ikonka orqa foni va o'zi */}
