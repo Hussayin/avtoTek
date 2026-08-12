@@ -82,7 +82,7 @@ const Navbar = () => {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 z-50 w-72 h-full bg-white shadow-2xl flex flex-col justify-between"
+              className="fixed top-0 right-0 z-[10000000] w-72 h-full bg-white shadow-2xl flex flex-col justify-between"
             >
               <div>
                 {/* Header: Sarlavha va Yopish tugmasi */}
