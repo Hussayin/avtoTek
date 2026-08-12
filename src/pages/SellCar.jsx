@@ -15,6 +15,8 @@ import {
   LuSend,
 } from "react-icons/lu";
 import { IoAlertCircleOutline } from "react-icons/io5";
+import { IoIosArrowBack } from "react-icons/io";
+import { NavLink } from "react-router-dom";
 
 // TELEGRAM BOT SOZLAMALARI
 // O'zingizning Bot Token va Chat ID'ingizni shu yerga kiriting:
@@ -166,11 +168,22 @@ ${formData.description || "Izoh yo'q"}
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="max-w-xl mx-auto px-4 py-6 pb-24"
+      className="max-w-xl mx-auto relative pt-0 px-4 py-6 pb-24"
     >
       <ToastContainer position="top-center" autoClose={3000} />
+      <div className="flex w-full left-0 justify-between items-center border-b bg-[#f8fafc] border-slate-200 sticky top-0 z-40">
+        <NavLink
+          to="/"
+          className="flex justify-center font-bold py-3 items-center w-25"
+        >
+          <IoIosArrowBack size={30} />
+          Orqaga
+        </NavLink>
+      </div>
 
-      <h1 className="text-2xl font-bold text-slate-900 mb-1">Tezkor Sotish</h1>
+      <h1 className="text-2xl font-bold text-slate-900 mb-1 mt-1.25">
+        Tezkor Sotish
+      </h1>
       <p className="text-xs text-slate-500 mb-5">
         Avtomobilingiz ma'lumotlarini kiriting va tez fursatda soting.
       </p>
