@@ -87,7 +87,7 @@ const Home = () => {
           KUN TAKLIFLARI
       ====================================================== */}
 
-      <div className="px-3 mt-2 pb-20">
+      <div className="px-2 mt-2 pb-20">
         <h2 className="text-lg font-bold text-slate-900 mb-2">
           Kun takliflari
         </h2>
@@ -97,7 +97,7 @@ const Home = () => {
         ==================================================== */}
 
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5">
             {[1, 2, 3, 4].map((n) => (
               <div
                 key={n}
@@ -110,7 +110,7 @@ const Home = () => {
              CARDLAR
           ================================================== */
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
             {cars.map((car) => (
               <CarCard key={car.id} car={car} />
             ))}

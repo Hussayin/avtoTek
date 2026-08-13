@@ -2,20 +2,33 @@ import axios from "axios";
 
 const CHANNEL_USERNAME = "DataBaseForAvtoTek";
 
+// Kelajakda qo'shiladigan (hozircha Telegram postida bo'lmaydigan) maydonlar
+// uchun standart "bo'sh" qiymat. UI shuni ko'rib "Kiritilmagan" deb chiqarishi
+// mumkin.
+const NOT_PROVIDED = "";
+
 /**
  * Telegram kanalidan avtomobil e'lonlarini olish
  *
- * Hozircha faqat BIRINCHI rasm olinadi.
- *
  * Telegram post misoli:
  *
- * Nomi: husan
- * Narxi: 2000
+ * Nomi: Spark 1.5 turbo
+ * Narxi: 8500
  * Yili: 2022
  * Probeg: 30000
+ * Korobka: avtomat
+ * Rangi: oq
+ * Motor: 1.5
+ * Yoqilgi: benzin
  * Joy: xorazm
- * Sana: 13.08.2026
- * Rasm1: https://i.ibb.co/43X4zFN/car.webp
+ * Sana: 14.08.2026
+ * Instagram: https://instagram.com/p/...
+ * Youtube: https://youtube.com/watch?v=...
+ * Tavsif: Mashina toza, hech qanday urilish yo'q.
+ * Rasm1: https://i.ibb.co/.../car1.webp
+ * Rasm2: https://i.ibb.co/.../car2.webp
+ * Rasm3: https://i.ibb.co/.../car3.webp
+ * Rasm4: https://i.ibb.co/.../car4.webp
  */
 export const fetchCarsFromTelegram = async () => {
   try {
@@ -131,14 +144,34 @@ export const fetchCarsFromTelegram = async () => {
       let location = "Toshkent sh.";
       let date = "Bugun";
 
-      // ENG MUHIM QISM
-      let imageUrl = "";
+      // Texnik xususiyatlar
+      let gearbox = NOT_PROVIDED; // Korobka: avtomat / mexanika
+      let color = NOT_PROVIDED; // Rangi
+      let engine = NOT_PROVIDED; // Motor hajmi
+      let fuel = NOT_PROVIDED; // Yoqilg'i turi
+
+      // Video / ijtimoiy tarmoq
+      let instagram = NOT_PROVIDED;
+      let youtube = NOT_PROVIDED;
+
+      // Tavsif
+      let description = NOT_PROVIDED;
+
+      // Rasmlar — bir nechta bo'lishi mumkin
+      // images[0] = Rasm1 = cardda ko'rinadigan asosiy rasm
+      const images = [];
 
       // =======================================================
-      // 1. POST ICHIDAGI LINKLARDAN RASM QIDIRISH
+      // 1. POST ICHIDAGI LINKLARDAN RASM QIDIRISH (zaxira usul)
+      //
+      // Matn ichidagi "Rasm1: ..." qatorlari asosiy manba, lekin
+      // agar Telegram avtomatik linkka aylantirgan bo'lsa, shu yerdan
+      // ham topib olamiz.
       // =======================================================
 
       const anchors = textNode.querySelectorAll("a");
+
+      const anchorImageUrls = [];
 
       for (const anchor of anchors) {
         const href = anchor.getAttribute("href") || "";
@@ -148,10 +181,7 @@ export const fetchCarsFromTelegram = async () => {
           /\.(webp|jpg|jpeg|png)(\?.*)?$/i.test(href);
 
         if (isImage) {
-          imageUrl = href;
-
-          // FAQAT BIRINCHI RASM
-          break;
+          anchorImageUrls.push(href);
         }
       }
 
@@ -191,7 +221,6 @@ export const fetchCarsFromTelegram = async () => {
         // -----------------------------------------------------
         // NOMI
         // -----------------------------------------------------
-
         if (lowerLine.startsWith("nomi:")) {
           name = cleanLine.replace(/^nomi:/i, "").trim();
         }
@@ -226,6 +255,37 @@ export const fetchCarsFromTelegram = async () => {
         }
 
         // -----------------------------------------------------
+        // KOROBKA (uzatma qutisi)
+        // -----------------------------------------------------
+        else if (lowerLine.startsWith("korobka:")) {
+          gearbox = cleanLine.replace(/^korobka:/i, "").trim();
+        }
+
+        // -----------------------------------------------------
+        // RANGI
+        // -----------------------------------------------------
+        else if (lowerLine.startsWith("rangi:")) {
+          color = cleanLine.replace(/^rangi:/i, "").trim();
+        }
+
+        // -----------------------------------------------------
+        // MOTOR HAJMI
+        // -----------------------------------------------------
+        else if (lowerLine.startsWith("motor:")) {
+          engine = cleanLine.replace(/^motor:/i, "").trim();
+        }
+
+        // -----------------------------------------------------
+        // YOQILG'I TURI
+        // -----------------------------------------------------
+        else if (
+          lowerLine.startsWith("yoqilgi:") ||
+          lowerLine.startsWith("yoqilg'i:")
+        ) {
+          fuel = cleanLine.replace(/^yoqilg'?i:/i, "").trim();
+        }
+
+        // -----------------------------------------------------
         // JOY
         // -----------------------------------------------------
         else if (lowerLine.startsWith("joy:")) {
@@ -240,19 +300,31 @@ export const fetchCarsFromTelegram = async () => {
         }
 
         // -----------------------------------------------------
-        // RASM1:
-        //
-        // yoki
-        //
-        // RASM:
-        //
-        // FAQAT BIRINCHI RASM
+        // INSTAGRAM
         // -----------------------------------------------------
-        else if (
-          !imageUrl &&
-          (lowerLine.startsWith("rasm1:") || lowerLine.startsWith("rasm:"))
-        ) {
-          let extractedUrl = cleanLine.replace(/^rasm1?:/i, "").trim();
+        else if (lowerLine.startsWith("instagram:")) {
+          instagram = cleanLine.replace(/^instagram:/i, "").trim();
+        }
+
+        // -----------------------------------------------------
+        // YOUTUBE
+        // -----------------------------------------------------
+        else if (lowerLine.startsWith("youtube:")) {
+          youtube = cleanLine.replace(/^youtube:/i, "").trim();
+        }
+
+        // -----------------------------------------------------
+        // TAVSIF
+        // -----------------------------------------------------
+        else if (lowerLine.startsWith("tavsif:")) {
+          description = cleanLine.replace(/^tavsif:/i, "").trim();
+        }
+
+        // -----------------------------------------------------
+        // RASM1:, RASM2:, RASM3:, RASM4: ... (cheklanmagan son)
+        // -----------------------------------------------------
+        else if (/^rasm\d*:/i.test(lowerLine)) {
+          let extractedUrl = cleanLine.replace(/^rasm\d*:/i, "").trim();
 
           // URL oxiridagi tasodifiy belgilarni olib tashlash
           extractedUrl = extractedUrl.replace(/[),.]+$/, "");
@@ -261,20 +333,20 @@ export const fetchCarsFromTelegram = async () => {
             extractedUrl.startsWith("http://") ||
             extractedUrl.startsWith("https://")
           ) {
-            imageUrl = extractedUrl;
-
-            console.log("Telegram textdan birinchi rasm topildi:", imageUrl);
+            images.push(extractedUrl);
           }
         }
       });
 
       // =======================================================
-      // 4. TELEGRAM POSTINING O'ZIDAGI RASM
-      //
-      // Agar Rasm1: topilmagan bo'lsa.
+      // 4. AGAR MATNDA RASM TOPILMAGAN BO'LSA — ZAXIRA MANBALAR
       // =======================================================
 
-      if (!imageUrl) {
+      if (images.length === 0 && anchorImageUrls.length > 0) {
+        images.push(...anchorImageUrls);
+      }
+
+      if (images.length === 0) {
         const photoNode = msg.querySelector(".tgme_widget_message_photo_wrap");
 
         if (photoNode) {
@@ -283,9 +355,12 @@ export const fetchCarsFromTelegram = async () => {
           const urlMatch = style.match(/url\(['"]?(.*?)['"]?\)/);
 
           if (urlMatch && urlMatch[1]) {
-            imageUrl = urlMatch[1];
+            images.push(urlMatch[1]);
 
-            console.log("Telegram postining o'zidan rasm topildi:", imageUrl);
+            console.log(
+              "Telegram postining o'zidan rasm topildi:",
+              urlMatch[1]
+            );
           }
         }
       }
@@ -298,21 +373,26 @@ export const fetchCarsFromTelegram = async () => {
         const car = {
           id: `${index}-${name}`,
 
-          name: name,
+          name,
+          price,
+          year,
+          mileage,
+          location,
+          date,
 
-          price: price,
+          gearbox,
+          color,
+          engine,
+          fuel,
 
-          year: year,
+          instagram,
+          youtube,
+          description,
 
-          mileage: mileage,
-
-          location: location,
-
-          date: date,
-
-          // MUHIM
-          // CarCard.jsx aynan shu image qiymatini ishlatadi.
-          image: imageUrl,
+          // CarCard.jsx faqat birinchisini (images[0]) ishlatadi.
+          // Detail sahifasi butun massivni ishlatadi.
+          images,
+          image: images[0] || "",
         };
 
         parsedCars.push(car);
