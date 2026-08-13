@@ -8,6 +8,9 @@ import {
   LuFuel,
   LuPalette,
   LuSettings2,
+  LuChevronLeft,
+  LuChevronRight,
+  LuExpand,
 } from "react-icons/lu";
 import { FaInstagram, FaYoutube } from "react-icons/fa";
 
@@ -21,15 +24,128 @@ const FUTURE_FIELDS = [
   { key: "ownersCount", label: "Egasi soni" },
 ];
 
-const InfoRow = ({ icon: Icon, label, value }) => (
-  <div className="flex items-center gap-2 py-2 border-b border-slate-100 last:border-b-0">
-    {Icon && <Icon className="text-slate-400 shrink-0" size={16} />}
-    <span className="text-xs text-slate-400 w-24 shrink-0">{label}</span>
-    <span className="text-sm text-slate-800 font-medium truncate">
-      {value && value !== "" ? value : "Kiritilmagan"}
-    </span>
-  </div>
-);
+// =============================================================
+// Statistika chipi — Yili, Probeg, Korobka va h.k.
+// =============================================================
+const StatChip = ({ icon: Icon, label, value }) => {
+  const hasValue = value && value !== "";
+  return (
+    <div className="bg-slate-50 rounded-2xl p-3 flex flex-col gap-1.5 min-w-0">
+      <div className="flex items-center gap-1.5 text-slate-400">
+        {Icon && <Icon size={14} />}
+        <span className="text-[10px] font-semibold uppercase tracking-wide">
+          {label}
+        </span>
+      </div>
+      <span
+        className={`text-sm font-bold truncate ${
+          hasValue ? "text-slate-900" : "text-slate-300 font-medium"
+        }`}
+      >
+        {hasValue ? value : "Kiritilmagan"}
+      </span>
+    </div>
+  );
+};
+
+// =============================================================
+// TO'LIQ EKRAN RASM GALEREYASI (lightbox)
+// =============================================================
+const FullscreenGallery = ({ images, startIndex, onClose }) => {
+  const [index, setIndex] = useState(startIndex);
+
+  const goNext = () => setIndex((prev) => (prev + 1) % images.length);
+  const goPrev = () =>
+    setIndex((prev) => (prev - 1 + images.length) % images.length);
+
+  const handleDragEnd = (event, info) => {
+    const threshold = 60;
+    if (info.offset.x < -threshold) goNext();
+    else if (info.offset.x > threshold) goPrev();
+  };
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-[70] bg-black flex items-center justify-center"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <motion.div
+        key={index}
+        className="w-full h-full flex items-center justify-center"
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.2}
+        onDragEnd={handleDragEnd}
+        onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0.4 }}
+        animate={{ opacity: 1 }}
+      >
+        <img
+          src={images[index]}
+          alt=""
+          className="max-w-full max-h-full object-contain pointer-events-none select-none"
+          draggable={false}
+        />
+      </motion.div>
+
+      {/* Yopish */}
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform"
+      >
+        <LuX size={20} />
+      </button>
+
+      {/* Hisoblagich */}
+      {images.length > 1 && (
+        <div className="absolute top-5 left-5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-white text-xs font-semibold">
+          {index + 1} / {images.length}
+        </div>
+      )}
+
+      {/* Oldinga / Orqaga */}
+      {images.length > 1 && (
+        <>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              goPrev();
+            }}
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform"
+          >
+            <LuChevronLeft size={20} />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              goNext();
+            }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform"
+          >
+            <LuChevronRight size={20} />
+          </button>
+        </>
+      )}
+
+      {/* Nuqtachalar */}
+      {images.length > 1 && (
+        <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-1.5">
+          {images.map((_, i) => (
+            <div
+              key={i}
+              className={`h-1.5 rounded-full transition-all ${
+                i === index ? "w-5 bg-white" : "w-1.5 bg-white/40"
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </motion.div>
+  );
+};
 
 const CarDetailModal = ({ car, onClose }) => {
   const images =
@@ -40,48 +156,39 @@ const CarDetailModal = ({ car, onClose }) => {
       : [];
 
   const [activeIndex, setActiveIndex] = useState(0);
+  const [showGallery, setShowGallery] = useState(false);
 
   if (!car) return null;
 
-  const goNext = () => {
-    setActiveIndex((prev) => (prev + 1) % images.length);
-  };
-
-  const goPrev = () => {
+  const goNext = () => setActiveIndex((prev) => (prev + 1) % images.length);
+  const goPrev = () =>
     setActiveIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
 
-  // Swipe orqali rasm almashtirish
   const handleDragEnd = (event, info) => {
     const threshold = 50;
-    if (info.offset.x < -threshold) {
-      goNext();
-    } else if (info.offset.x > threshold) {
-      goPrev();
-    }
+    if (info.offset.x < -threshold) goNext();
+    else if (info.offset.x > threshold) goPrev();
   };
 
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center"
+        className="fixed inset-0 z-50 bg-white"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={onClose}
       >
         <motion.div
-          className="bg-white w-full sm:max-w-md sm:rounded-3xl rounded-t-3xl max-h-[92vh] overflow-y-auto"
-          initial={{ y: "100%" }}
-          animate={{ y: 0 }}
-          exit={{ y: "100%" }}
-          transition={{ type: "spring", damping: 28, stiffness: 300 }}
-          onClick={(e) => e.stopPropagation()}
+          className="w-full h-full overflow-y-auto"
+          initial={{ y: "6%", opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: "6%", opacity: 0 }}
+          transition={{ type: "spring", damping: 30, stiffness: 320 }}
         >
           {/* =====================================================
               RASMLAR SLAYDERI
           ====================================================== */}
-          <div className="relative w-full h-64 bg-slate-100 overflow-hidden rounded-t-3xl sm:rounded-t-3xl">
+          <div className="relative w-full h-[46vh] bg-slate-100 overflow-hidden">
             {images.length > 0 ? (
               <motion.div
                 className="w-full h-full"
@@ -89,11 +196,12 @@ const CarDetailModal = ({ car, onClose }) => {
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.15}
                 onDragEnd={handleDragEnd}
+                onClick={() => setShowGallery(true)}
               >
                 <img
                   src={images[activeIndex]}
                   alt={car.name}
-                  className="w-full h-full object-cover pointer-events-none"
+                  className="w-full h-full object-cover pointer-events-none select-none"
                   draggable={false}
                 />
               </motion.div>
@@ -103,18 +211,39 @@ const CarDetailModal = ({ car, onClose }) => {
               </div>
             )}
 
+            {/* Yuqoridan qorong'ulashtiruvchi gradient — tugmalar aniq ko'rinishi uchun */}
+            <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-black/40 to-transparent pointer-events-none" />
+
             {/* Yopish tugmasi */}
             <button
               type="button"
               onClick={onClose}
-              className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-slate-700 shadow-sm active:scale-90 transition-transform"
+              className="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-slate-700 shadow-sm active:scale-90 transition-transform"
             >
-              <LuX size={18} />
+              <LuX size={20} />
             </button>
+
+            {/* To'liq ekran tugmasi */}
+            {images.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowGallery(true)}
+                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-slate-700 shadow-sm active:scale-90 transition-transform"
+              >
+                <LuExpand size={17} />
+              </button>
+            )}
+
+            {/* Hisoblagich */}
+            {images.length > 1 && (
+              <div className="absolute bottom-4 right-4 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md text-white text-[11px] font-semibold">
+                {activeIndex + 1} / {images.length}
+              </div>
+            )}
 
             {/* Nuqtachalar */}
             {images.length > 1 && (
-              <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+              <div className="absolute bottom-4 left-4 flex gap-1.5">
                 {images.map((_, i) => (
                   <button
                     key={i}
@@ -131,25 +260,27 @@ const CarDetailModal = ({ car, onClose }) => {
           {/* =====================================================
               ASOSIY MA'LUMOT
           ====================================================== */}
-          <div className="p-4">
-            <h2 className="text-lg font-bold text-slate-900 mb-0.5">
-              {car.name || "Avtomobil"}
-            </h2>
-            <div className="text-blue-600 font-extrabold text-2xl mb-3">
+          <div className="px-4 pt-5 pb-10 -mt-4 bg-white rounded-t-3xl relative">
+            <div className="flex items-start justify-between gap-3 mb-1">
+              <h2 className="text-xl font-bold text-slate-900 leading-tight">
+                {car.name || "Avtomobil"}
+              </h2>
+            </div>
+            <div className="text-blue-600 font-extrabold text-[26px] mb-4">
               ${Number(car.price || 0).toLocaleString()}
             </div>
 
             {/* Instagram / Youtube tugmalari */}
             {(car.instagram || car.youtube) && (
-              <div className="flex gap-2 mb-4">
+              <div className="flex gap-2 mb-5">
                 {car.instagram && (
                   <a
                     href={car.instagram}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 text-white text-xs font-semibold active:scale-95 transition-transform"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 text-white text-xs font-semibold active:scale-95 transition-transform shadow-sm"
                   >
-                    <FaInstagram size={14} /> Instagram
+                    <FaInstagram size={15} /> Tekshiruv (Instagram)
                   </a>
                 )}
                 {car.youtube && (
@@ -157,20 +288,23 @@ const CarDetailModal = ({ car, onClose }) => {
                     href={car.youtube}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-red-600 text-white text-xs font-semibold active:scale-95 transition-transform"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl bg-red-600 text-white text-xs font-semibold active:scale-95 transition-transform shadow-sm"
                   >
-                    <FaYoutube size={14} /> Youtube
+                    <FaYoutube size={15} /> Tekshiruv (Youtube)
                   </a>
                 )}
               </div>
             )}
 
             {/* =================================================
-                TEXNIK XUSUSIYATLAR
+                TEXNIK XUSUSIYATLAR — CHIP GRID
             ================================================== */}
-            <div className="bg-slate-50 rounded-2xl px-3 mb-4">
-              <InfoRow icon={LuCalendar} label="Yili" value={car.year} />
-              <InfoRow
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">
+              Xususiyatlari
+            </div>
+            <div className="grid grid-cols-2 gap-2.5 mb-5">
+              <StatChip icon={LuCalendar} label="Yili" value={car.year} />
+              <StatChip
                 icon={LuGauge}
                 label="Probeg"
                 value={
@@ -179,20 +313,38 @@ const CarDetailModal = ({ car, onClose }) => {
                     : ""
                 }
               />
-              <InfoRow icon={LuSettings2} label="Korobka" value={car.gearbox} />
-              <InfoRow icon={LuPalette} label="Rangi" value={car.color} />
-              <InfoRow icon={LuSettings2} label="Motor" value={car.engine} />
-              <InfoRow icon={LuFuel} label="Yoqilg'i" value={car.fuel} />
-              <InfoRow icon={LuMapPin} label="Joy" value={car.location} />
-              <InfoRow icon={LuCalendar} label="Sana" value={car.date} />
+              <StatChip
+                icon={LuSettings2}
+                label="Korobka"
+                value={car.gearbox}
+              />
+              <StatChip icon={LuPalette} label="Rangi" value={car.color} />
+              <StatChip icon={LuSettings2} label="Motor" value={car.engine} />
+              <StatChip icon={LuFuel} label="Yoqilg'i" value={car.fuel} />
+            </div>
+
+            {/* =================================================
+                JOY VA SANA
+            ================================================== */}
+            <div className="flex items-center justify-between text-sm text-slate-500 mb-5 px-1">
+              <div className="flex items-center gap-1.5">
+                <LuMapPin size={16} className="text-slate-400" />
+                <span>{car.location || "O'zbekiston"}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <LuCalendar size={16} className="text-slate-400" />
+                <span>{car.date || "Bugun"}</span>
+              </div>
             </div>
 
             {/* =================================================
                 TAVSIF
             ================================================== */}
             {car.description && (
-              <div className="mb-4">
-                <div className="text-xs text-slate-400 mb-1">Tavsif</div>
+              <div className="mb-5">
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">
+                  Tavsif
+                </div>
                 <p className="text-sm text-slate-700 leading-relaxed">
                   {car.description}
                 </p>
@@ -202,9 +354,12 @@ const CarDetailModal = ({ car, onClose }) => {
             {/* =================================================
                 KELAJAKDA QO'SHILADIGAN MAYDONLAR
             ================================================== */}
-            <div className="bg-slate-50 rounded-2xl px-3 mb-2">
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">
+              Qo'shimcha
+            </div>
+            <div className="grid grid-cols-2 gap-2.5">
               {FUTURE_FIELDS.map((field) => (
-                <InfoRow
+                <StatChip
                   key={field.key}
                   label={field.label}
                   value={car[field.key]}
@@ -214,6 +369,17 @@ const CarDetailModal = ({ car, onClose }) => {
           </div>
         </motion.div>
       </motion.div>
+
+      {/* =====================================================
+          TO'LIQ EKRAN GALEREYA
+      ====================================================== */}
+      {showGallery && (
+        <FullscreenGallery
+          images={images}
+          startIndex={activeIndex}
+          onClose={() => setShowGallery(false)}
+        />
+      )}
     </AnimatePresence>
   );
 };
