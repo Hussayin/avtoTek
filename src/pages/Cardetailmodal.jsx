@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   LuX,
@@ -157,6 +157,33 @@ const CarDetailModal = ({ car, onClose }) => {
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [showGallery, setShowGallery] = useState(false);
+
+  // =========================================================
+  // ORQADAGI SAHIFANI SCROLL QILDIRMASLIK
+  //
+  // Modal ochiq turgan payt <body> ni qulflaymiz, aks holda
+  // modal ichida scroll qilinganda orqadagi sahifa ham
+  // birga scroll bo'lib ketadi (ayniqsa mobil brauzerlarda).
+  // =========================================================
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    const originalPosition = document.body.style.position;
+    const originalWidth = document.body.style.width;
+    const scrollY = window.scrollY;
+
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.position = originalPosition;
+      document.body.style.width = originalWidth;
+      document.body.style.top = "";
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
 
   if (!car) return null;
 
