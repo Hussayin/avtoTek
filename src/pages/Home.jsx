@@ -1,26 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import Navbar from "../comps/Navbar";
 import MenuBar from "./MenuBar";
 import SearchBar from "./SearchBar";
 import CarCard from "./CarCard";
+import { LuRefreshCw } from "react-icons/lu";
 
 // =========================================================
 // TELEGRAM SERVICE
 // =========================================================
-//
-// AGAR telegramService.js Home.jsx BILAN BIR PAPKADA BO'LSA:
-//
-// ./telegramService
-//
-// AGAR services PAPKASIDA BO'LSA:
-//
-// ../services/telegramService
-//
-// Pastdagi importni o'zingdagi joylashuvga qarab tekshir.
-// =========================================================
 
 import { fetchCarsFromTelegram } from "../services/telegramService";
+
+// Har necha millisekundda fon rejimida yangilanishi
+const AUTO_REFRESH_INTERVAL = 30000; // 30 soniya
 
 const Home = () => {
   // =========================================================
@@ -29,35 +22,97 @@ const Home = () => {
 
   const [cars, setCars] = useState([]);
 
+  // Faqat BIRINCHI yuklanishda skeleton ko'rsatish uchun
   const [loading, setLoading] = useState(true);
 
+  // Fon rejimida yangilanayotganini bildiruvchi kichik indikator
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Birinchi muvaffaqiyatli yuklanish sodir bo'lganini bilish uchun
+  const hasLoadedOnce = useRef(false);
+
   // =========================================================
-  // TELEGRAMDAN MA'LUMOT OLISH
+  // MA'LUMOTNI OLISH FUNKSIYASI
+  //
+  // silent = true bo'lsa, loading skeleton chiqmaydi — foydalanuvchi
+  // sezmasdan fon rejimida yangilanadi.
+  // =========================================================
+
+  const loadTelegramCars = async (silent = false) => {
+    try {
+      if (silent) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+
+      console.log(
+        silent
+          ? "Fon rejimida yangilanmoqda..."
+          : "Telegramdan avtomobillar olinmoqda..."
+      );
+
+      const telegramCars = await fetchCarsFromTelegram();
+
+      console.log("Home.jsx ga kelgan mashinalar:", telegramCars);
+
+      // Agar bo'sh massiv qaytsa-yu, avval ma'lumot bo'lgan bo'lsa,
+      // ehtimol proksilar vaqtincha ishlamay qoldi — eski ma'lumotni
+      // ekranda saqlab qolamiz, bo'sh ekran ko'rsatmaymiz.
+      if (telegramCars.length === 0 && hasLoadedOnce.current) {
+        console.warn(
+          "Yangi ma'lumot 0 ta qaytdi — eski ma'lumot ekranda saqlanadi."
+        );
+      } else {
+        setCars(telegramCars);
+        hasLoadedOnce.current = true;
+      }
+    } catch (error) {
+      console.error("Telegram avtomobillarini yuklashda xatolik:", error);
+      // Xatolik bo'lsa ham eski ma'lumotni ekranda qoldiramiz
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  // =========================================================
+  // BIRINCHI YUKLANISH + FON REJIMIDA AVTOMATIK YANGILANISH
   // =========================================================
 
   useEffect(() => {
-    const loadTelegramCars = async () => {
-      try {
-        setLoading(true);
+    // 1. Birinchi marta — loading skeleton bilan
+    loadTelegramCars(false);
 
-        console.log("Telegramdan avtomobillar olinmoqda...");
+    // 2. Muntazam fon rejimida yangilanish
+    const intervalId = setInterval(() => {
+      loadTelegramCars(true);
+    }, AUTO_REFRESH_INTERVAL);
 
-        const telegramCars = await fetchCarsFromTelegram();
-
-        console.log("Home.jsx ga kelgan mashinalar:", telegramCars);
-
-        setCars(telegramCars);
-      } catch (error) {
-        console.error("Telegram avtomobillarini yuklashda xatolik:", error);
-
-        setCars([]);
-      } finally {
-        setLoading(false);
+    // 3. Foydalanuvchi ilovaga qaytganda (masalan boshqa tabdan
+    //    yoki Telegram Mini App fonidan qaytganda) ham darrov
+    //    yangilab qo'yamiz
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        loadTelegramCars(true);
       }
     };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    loadTelegramCars();
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, []);
+
+  // =========================================================
+  // QO'LDA YANGILASH TUGMASI
+  // =========================================================
+
+  const handleManualRefresh = () => {
+    if (refreshing) return;
+    loadTelegramCars(true);
+  };
 
   // =========================================================
   // UI
@@ -65,39 +120,35 @@ const Home = () => {
 
   return (
     <div>
-      {/* =====================================================
-          NAVBAR
-      ====================================================== */}
-
       <Navbar />
-
-      {/* =====================================================
-          MENU
-      ====================================================== */}
-
       <MenuBar />
-
-      {/* =====================================================
-          SEARCH
-      ====================================================== */}
-
       <SearchBar />
 
-      {/* =====================================================
-          KUN TAKLIFLARI
-      ====================================================== */}
+      <div className="px-3 mt-2 pb-20">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-lg font-bold text-slate-900">Kun takliflari</h2>
 
-      <div className="px-2 mt-2 pb-20">
-        <h2 className="text-lg font-bold text-slate-900 mb-2">
-          Kun takliflari
-        </h2>
+          {/* =================================================
+              QO'LDA YANGILASH TUGMASI
+          ================================================== */}
+          <button
+            type="button"
+            onClick={handleManualRefresh}
+            className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 active:scale-90 transition-transform"
+          >
+            <LuRefreshCw
+              size={16}
+              className={refreshing ? "animate-spin" : ""}
+            />
+          </button>
+        </div>
 
         {/* ===================================================
-            LOADING
+            LOADING — FAQAT BIRINCHI YUKLANISHDA
         ==================================================== */}
 
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {[1, 2, 3, 4].map((n) => (
               <div
                 key={n}
@@ -110,7 +161,7 @@ const Home = () => {
              CARDLAR
           ================================================== */
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {cars.map((car) => (
               <CarCard key={car.id} car={car} />
             ))}
