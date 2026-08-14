@@ -287,7 +287,7 @@ const CarDetailModal = ({ car, onClose }) => {
           {/* =====================================================
               ASOSIY MA'LUMOT
           ====================================================== */}
-          <div className="px-4 pt-5 pb-10 -mt-4 bg-white rounded-t-3xl relative">
+          <div className="px-4 pt-5 pb-10 mb-[100px] -mt-4 bg-white rounded-t-3xl relative">
             <div className="flex items-start justify-between gap-3 mb-1">
               <h2 className="text-xl font-bold text-slate-900 leading-tight">
                 {car.name || "Avtomobil"}
