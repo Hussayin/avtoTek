@@ -138,6 +138,8 @@ export const fetchCarsFromTelegram = async () => {
       // -------------------------------------------------------
 
       let name = "";
+      let carId = "";
+      let vin = "";
       let price = 0;
       let year = 2024;
       let mileage = 0;
@@ -219,10 +221,24 @@ export const fetchCarsFromTelegram = async () => {
         const lowerLine = cleanLine.toLowerCase();
 
         // -----------------------------------------------------
+        // ID
+        // -----------------------------------------------------
+        if (lowerLine.startsWith("id:")) {
+          carId = cleanLine.replace(/^id:/i, "").trim();
+        }
+
+        // -----------------------------------------------------
         // NOMI
         // -----------------------------------------------------
-        if (lowerLine.startsWith("nomi:")) {
+        else if (lowerLine.startsWith("nomi:")) {
           name = cleanLine.replace(/^nomi:/i, "").trim();
+        }
+
+        // -----------------------------------------------------
+        // VIN / KUZOV SERIYA RAQAMI
+        // -----------------------------------------------------
+        else if (lowerLine.startsWith("vin:")) {
+          vin = cleanLine.replace(/^vin:/i, "").trim();
         }
 
         // -----------------------------------------------------
@@ -371,7 +387,11 @@ export const fetchCarsFromTelegram = async () => {
 
       if (name) {
         const car = {
-          id: `${index}-${name}`,
+          // Agar Telegram postida "ID:" bo'lsa o'shani ishlatamiz,
+          // bo'lmasa (eski postlar uchun) index+nom asosida zaxira ID.
+          id: carId || `${index}-${name}`,
+          listingId: carId || "",
+          vin,
 
           name,
           price,

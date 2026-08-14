@@ -287,12 +287,17 @@ const CarDetailModal = ({ car, onClose }) => {
           {/* =====================================================
               ASOSIY MA'LUMOT
           ====================================================== */}
-          <div className="px-4 pt-5 pb-10 mb-[100px] -mt-4 bg-white rounded-t-3xl relative">
+          <div className="px-4 pt-5 pb-10 -mt-4 bg-white rounded-t-3xl relative">
             <div className="flex items-start justify-between gap-3 mb-1">
               <h2 className="text-xl font-bold text-slate-900 leading-tight">
                 {car.name || "Avtomobil"}
               </h2>
             </div>
+            {car.listingId && (
+              <div className="text-[11px] text-slate-400 font-mono mb-1">
+                {car.listingId}
+              </div>
+            )}
             <div className="text-blue-600 font-extrabold text-[26px] mb-4">
               ${Number(car.price || 0).toLocaleString()}
             </div>
@@ -348,6 +353,7 @@ const CarDetailModal = ({ car, onClose }) => {
               <StatChip icon={LuPalette} label="Rangi" value={car.color} />
               <StatChip icon={LuSettings2} label="Motor" value={car.engine} />
               <StatChip icon={LuFuel} label="Yoqilg'i" value={car.fuel} />
+              <StatChip icon={LuSettings2} label="VIN raqami" value={car.vin} />
             </div>
 
             {/* =================================================
