@@ -13,7 +13,7 @@ import { LuRefreshCw } from "react-icons/lu";
 import { fetchCarsFromTelegram } from "../services/telegramService";
 
 // Har necha millisekundda fon rejimida yangilanishi
-const AUTO_REFRESH_INTERVAL = 30000; // 30 soniya
+const AUTO_REFRESH_INTERVAL = 50000; // 30 soniya
 
 const Home = () => {
   // =========================================================
