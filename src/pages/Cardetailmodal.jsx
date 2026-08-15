@@ -30,7 +30,7 @@ const FUTURE_FIELDS = [
 const StatChip = ({ icon: Icon, label, value }) => {
   const hasValue = value && value !== "";
   return (
-    <div className="bg-slate-50 rounded-2xl p-3 flex flex-col gap-1.5 min-w-0">
+    <div className="bg-white rounded-2xl p-3 flex flex-col gap-1.5 min-w-0">
       <div className="flex items-center gap-1.5 text-slate-400">
         {Icon && <Icon size={14} />}
         <span className="text-[10px] font-semibold uppercase tracking-wide">
@@ -200,7 +200,7 @@ const CarDetailModal = ({ car, onClose }) => {
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-50 bg-white"
+        className="fixed inset-0 z-50 bg-[#f8fafc]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -287,7 +287,7 @@ const CarDetailModal = ({ car, onClose }) => {
           {/* =====================================================
               ASOSIY MA'LUMOT
           ====================================================== */}
-          <div className="px-4 pt-5 pb-10 -mt-4 bg-white rounded-t-3xl relative">
+          <div className="px-4 mb-[50px] pt-5 pb-10 -mt-4 bg-[#f8fafc] rounded-t-3xl relative">
             <div className="flex items-start justify-between gap-3 mb-1">
               <h2 className="text-xl font-bold text-slate-900 leading-tight">
                 {car.name || "Avtomobil"}
