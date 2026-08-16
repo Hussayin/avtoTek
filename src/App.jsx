@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import BottomNav from "./pages/BottomNav";
 import About from "./pages/About";
 import SellCar from "./pages/SellCar";
+import LikedProduct from "./pages/LikedProduct";
 
 const App = () => {
   return (
@@ -23,10 +24,7 @@ const App = () => {
           path="/sell"
           element={<div className="p-4">E'lon berish sahifasi</div>}
         />
-        <Route
-          path="/favorites"
-          element={<div className="p-4">Saqlangan e'lonlar</div>}
-        />
+        <Route path="/favorites" element={<LikedProduct />} />
       </Routes>
       {/* Pastda qotib turuvchi menyu */}
       <BottomNav />

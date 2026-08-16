@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { LuHeart, LuMapPin, LuCalendar } from "react-icons/lu";
 
 import { FaHeart } from "react-icons/fa";
-import CarDetailModal from "./Cardetailmodal";
+import CarDetailModal from "./CarDetailModal.jsx";
+import { isCarLiked, toggleCarLike } from "./Likes";
 
 const CarCard = ({ car }) => {
   // =========================================================
@@ -11,6 +12,18 @@ const CarCard = ({ car }) => {
   // =========================================================
 
   const [isLiked, setIsLiked] = useState(false);
+
+  // Component birinchi chizilganda, shu mashina avval like
+  // qilinganmi — localStorage'dan tekshiramiz.
+  useEffect(() => {
+    setIsLiked(isCarLiked(car?.id));
+  }, [car?.id]);
+
+  const handleToggleLike = (e) => {
+    e.stopPropagation();
+    const newState = toggleCarLike(car?.id);
+    setIsLiked(newState);
+  };
 
   // =========================================================
   // DETAIL MODAL
@@ -81,10 +94,7 @@ const CarCard = ({ car }) => {
 
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsLiked(!isLiked);
-            }}
+            onClick={handleToggleLike}
             className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-slate-700 hover:bg-white active:scale-90 transition-all shadow-sm"
           >
             {isLiked ? (
