@@ -25,7 +25,7 @@ const BottomNav = () => {
 
         {/* 2. Bozor */}
         <NavLink
-          to="/market"
+          to="/bozor"
           className={({ isActive }) =>
             `flex flex-col items-center justify-center flex-1 py-1 transition-all duration-200 ${
               isActive

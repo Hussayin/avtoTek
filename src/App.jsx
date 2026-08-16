@@ -7,6 +7,7 @@ import BottomNav from "./pages/BottomNav";
 import About from "./pages/About";
 import SellCar from "./pages/SellCar";
 import LikedProduct from "./pages/LikedProduct";
+import Bozor from "./pages/Bozor";
 
 const App = () => {
   return (
@@ -16,10 +17,7 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/sell" element={<SellCar />} />
-        <Route
-          path="/market"
-          element={<div className="p-4">Bozor sahifasi</div>}
-        />
+        <Route path="/bozor" element={<Bozor />} />
         <Route
           path="/sell"
           element={<div className="p-4">E'lon berish sahifasi</div>}
