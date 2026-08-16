@@ -2,6 +2,10 @@ import axios from "axios";
 
 const CHANNEL_USERNAME = "DataBaseForAvtoTek";
 
+// Har bir proksiga necha millisekund kutish (sekin internetga
+// ko'proq imkon berish uchun uzaytirilgan, avval 8000 edi).
+const PROXY_TIMEOUT = 20000; // 20 soniya
+
 // Kelajakda qo'shiladigan (hozircha Telegram postida bo'lmaydigan) maydonlar
 // uchun standart "bo'sh" qiymat. UI shuni ko'rib "Kiritilmagan" deb chiqarishi
 // mumkin.
@@ -55,41 +59,55 @@ export const fetchCarsFromTelegram = async () => {
     let htmlText = "";
 
     // =========================================================
-    // TELEGRAM HTML OLISH
+    // TELEGRAM HTML OLISH — UCHTALA PROKSI PARALLEL SO'ROV QILINADI
+    //
+    // Avval ketma-ket (birin-ketin) so'rov qilinardi — eng yomon
+    // holatda 3 x PROXY_TIMEOUT kutish kerak bo'lardi. Endi
+    // hammasi bir vaqtda so'raladi, qaysi biri birinchi to'g'ri
+    // javob bersa o'sha ishlatiladi — eng yomon holatda ham
+    // atigi ~PROXY_TIMEOUT kutiladi.
     // =========================================================
 
-    for (const proxyUrl of proxies) {
-      try {
-        console.log("Telegram proxy tekshirilmoqda:", proxyUrl);
+    async function tryProxy(proxyUrl) {
+      console.log("Telegram proxy tekshirilmoqda:", proxyUrl);
 
-        const response = await axios.get(proxyUrl, {
-          timeout: 8000,
-        });
+      const response = await axios.get(proxyUrl, {
+        timeout: PROXY_TIMEOUT,
+      });
 
-        let data = response.data;
+      let data = response.data;
 
-        // allorigins javobida:
-        //
-        // {
-        //   contents: "TELEGRAM HTML"
-        // }
-        //
-        // bo'ladi.
+      // allorigins javobida:
+      //
+      // {
+      //   contents: "TELEGRAM HTML"
+      // }
+      //
+      // bo'ladi.
 
-        if (data && typeof data === "object" && data.contents) {
-          data = data.contents;
-        }
-
-        if (typeof data === "string" && data.includes("tgme_widget_message")) {
-          htmlText = data;
-
-          console.log("Telegram HTML muvaffaqiyatli olindi.");
-
-          break;
-        }
-      } catch (error) {
-        console.warn("Bu proxy ishlamadi:", proxyUrl);
+      if (data && typeof data === "object" && data.contents) {
+        data = data.contents;
       }
+
+      if (typeof data === "string" && data.includes("tgme_widget_message")) {
+        console.log("Telegram HTML muvaffaqiyatli olindi:", proxyUrl);
+        return data;
+      }
+
+      // Javob keldi, lekin kutilgan formatda emas — xato deb hisoblaymiz,
+      // shunda Promise.any boshqa proksilarni kutishda davom etadi.
+      throw new Error("Proksi noto'g'ri formatda javob berdi: " + proxyUrl);
+    }
+
+    try {
+      htmlText = await Promise.any(proxies.map((url) => tryProxy(url)));
+    } catch (aggregateError) {
+      // Promise.any — hamma proksi ham muvaffaqiyatsiz bo'lgandagina
+      // shu yerga tushadi (AggregateError).
+      console.warn(
+        "Uchala proksi ham ishlamadi:",
+        aggregateError?.errors || aggregateError
+      );
     }
 
     // =========================================================
