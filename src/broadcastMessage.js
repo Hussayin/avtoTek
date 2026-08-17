@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // TELEGRAM BOT SOZLAMALARI — boshqa fayllardagi bilan bir xil
-const BOT_TOKEN = "8662301963:AAH2CDSG36iZR-tSoOavYI7sNxE1jzfeTNQ";
+const BOT_TOKEN = "8911264991:AAFCfdZdZmZPsLx_oNpfsxC4bKqoeX2IdDA";
 
 // Har bir xabar orasida necha millisekund kutish (Telegram limitiga
 // tegib qolmaslik uchun)
