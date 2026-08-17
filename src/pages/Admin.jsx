@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-import { LuUsers, LuLock } from "react-icons/lu";
+import { LuUsers, LuLock, LuSend } from "react-icons/lu";
+import { sendBroadcast } from "../broadcastMessage";
 
 // Admin sahifasiga kirish uchun oddiy parol (kod ichida saqlanadi —
 // bu jiddiy xavfsizlik emas, faqat oddiy foydalanuvchilar tasodifan
@@ -15,6 +16,34 @@ const Admin = () => {
 
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // =========================================================
+  // XABAR YUBORISH (BROADCAST)
+  // =========================================================
+  const [broadcastText, setBroadcastText] = useState("");
+  const [sending, setSending] = useState(false);
+  const [progress, setProgress] = useState({ sent: 0, total: 0 });
+  const [broadcastResult, setBroadcastResult] = useState(null);
+
+  const handleSendBroadcast = async () => {
+    if (!broadcastText.trim() || users.length === 0 || sending) return;
+
+    setSending(true);
+    setBroadcastResult(null);
+    setProgress({ sent: 0, total: users.length });
+
+    const result = await sendBroadcast(
+      users,
+      broadcastText.trim(),
+      (sent, total) => {
+        setProgress({ sent, total });
+      }
+    );
+
+    setBroadcastResult(result);
+    setSending(false);
+    setBroadcastText("");
+  };
 
   // =========================================================
   // PAROLNI TEKSHIRISH
@@ -123,6 +152,44 @@ const Admin = () => {
         Jami: <span className="font-bold text-slate-900">{users.length}</span>{" "}
         ta foydalanuvchi
       </p>
+
+      {/* ===================================================
+          XABAR YUBORISH (BROADCAST)
+      ==================================================== */}
+      <div className="bg-white rounded-2xl p-4 border border-slate-100 mb-6">
+        <div className="flex items-center gap-1.5 mb-2">
+          <LuSend size={16} className="text-blue-600" />
+          <span className="text-sm font-bold text-slate-900">
+            Hammaga xabar yuborish
+          </span>
+        </div>
+        <textarea
+          value={broadcastText}
+          onChange={(e) => setBroadcastText(e.target.value)}
+          rows={3}
+          placeholder={`Masalan: "Yangi mashina bugun qo'yildi! Ko'proq ma'lumot uchun botni oching."`}
+          disabled={sending}
+          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 resize-none mb-2 disabled:opacity-60"
+        />
+        <button
+          type="button"
+          onClick={handleSendBroadcast}
+          disabled={sending || !broadcastText.trim() || users.length === 0}
+          className="w-full py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold disabled:opacity-40 active:scale-98 transition-transform"
+        >
+          {sending
+            ? `Yuborilmoqda... (${progress.sent}/${progress.total})`
+            : `Hammaga yuborish (${users.length} ta)`}
+        </button>
+
+        {broadcastResult && !sending && (
+          <p className="text-xs text-slate-500 mt-2 text-center">
+            ✅ {broadcastResult.successCount} ta yuborildi
+            {broadcastResult.failCount > 0 &&
+              ` · ❌ ${broadcastResult.failCount} ta yuborilmadi (bot bloklangan)`}
+          </p>
+        )}
+      </div>
 
       {loading ? (
         <div className="space-y-2">
