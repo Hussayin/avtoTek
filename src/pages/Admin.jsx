@@ -140,18 +140,31 @@ const Admin = () => {
               key={user.id}
               className="bg-white rounded-2xl p-3 border border-slate-100 flex items-center justify-between"
             >
-              <div>
-                <div className="font-semibold text-slate-900 text-sm">
-                  {user.firstName} {user.lastName}
-                  {user.username && (
-                    <span className="text-slate-400 font-normal">
-                      {" "}
-                      @{user.username}
-                    </span>
-                  )}
-                </div>
-                <div className="text-xs text-slate-400 mt-0.5">
-                  ID: {user.telegramId}
+              <div className="flex items-center gap-3 min-w-0">
+                {user.photoUrl ? (
+                  <img
+                    src={user.photoUrl}
+                    alt=""
+                    className="w-10 h-10 rounded-full object-cover shrink-0"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-sm font-bold shrink-0">
+                    {(user.firstName || "?").charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <div className="font-semibold text-slate-900 text-sm truncate">
+                    {user.firstName} {user.lastName}
+                    {user.username && (
+                      <span className="text-slate-400 font-normal">
+                        {" "}
+                        @{user.username}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-xs text-slate-400 mt-0.5">
+                    ID: {user.telegramId}
+                  </div>
                 </div>
               </div>
               <div className="text-right text-[11px] text-slate-400 shrink-0">

@@ -43,6 +43,7 @@ export async function trackTelegramUser() {
         lastName: user.last_name || "",
         username: user.username || "",
         languageCode: user.language_code || "",
+        photoUrl: user.photo_url || "",
         firstSeenAt: serverTimestamp(),
         lastSeenAt: serverTimestamp(),
       });
