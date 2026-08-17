@@ -18,6 +18,7 @@ import { FaInstagram, FaYoutube } from "react-icons/fa";
 // Kelajakda qo'shiladigan (hozircha Telegram postida bo'lmagan)
 // maydonlar. Qiymati bo'lmasa "Kiritilmagan" deb chiqadi.
 // =============================================================
+
 const FUTURE_FIELDS = [
   { key: "bodyType", label: "Kuzov turi" },
   { key: "certificateNo", label: "Sertifikat raqami" },
