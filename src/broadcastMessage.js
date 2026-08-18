@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const BOT_TOKEN = "8911264991:AAFCfdZdZmZPsLx_oNpfsxC4bKqoeX2IdDA";
-// Bot Web App ilovangiz havolasi yoki botga o'tish havolasi (username'ingizni tekshirib o'zgartiring)
-const BOT_USERNAME = "Avtotekuzbot";
+// Mini App ilovangizning to'liq havolasi (Vercel, Netlify yoki domain adresi)
+const WEB_APP_URL = "https://avtotek.netlify.app";
 const DELAY_BETWEEN_MESSAGES = 120;
 
 function sleep(ms) {
@@ -17,13 +17,13 @@ export async function sendBroadcast(users, messageText, imageUrl, onProgress) {
   const isValidImageUrl =
     cleanUrl.startsWith("http://") || cleanUrl.startsWith("https://");
 
-  // Xabar ostida chiqadigan inline tugma
+  // Inline tugma orqali to'g'ridan-to'g'ri Mini App'ni ochish
   const replyMarkup = {
     inline_keyboard: [
       [
         {
           text: "🚀 Botni ishga tushirish",
-          url: `https://t.me/${BOT_USERNAME}`,
+          web_app: { url: WEB_APP_URL },
         },
       ],
     ],
@@ -80,7 +80,6 @@ export async function sendBroadcast(users, messageText, imageUrl, onProgress) {
 
   return { successCount, failCount };
 }
-
 //
 
 //
