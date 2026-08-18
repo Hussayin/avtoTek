@@ -1,6 +1,8 @@
 import axios from "axios";
 
 const BOT_TOKEN = "8911264991:AAFCfdZdZmZPsLx_oNpfsxC4bKqoeX2IdDA";
+// Bot Web App ilovangiz havolasi yoki botga o'tish havolasi (username'ingizni tekshirib o'zgartiring)
+const BOT_USERNAME = "Avtotekuzbot";
 const DELAY_BETWEEN_MESSAGES = 120;
 
 function sleep(ms) {
@@ -15,15 +17,24 @@ export async function sendBroadcast(users, messageText, imageUrl, onProgress) {
   const isValidImageUrl =
     cleanUrl.startsWith("http://") || cleanUrl.startsWith("https://");
 
+  // Xabar ostida chiqadigan inline tugma
+  const replyMarkup = {
+    inline_keyboard: [
+      [
+        {
+          text: "🚀 Botni ishga tushirish",
+          url: `https://t.me/${BOT_USERNAME}`,
+        },
+      ],
+    ],
+  };
+
   for (let i = 0; i < users.length; i++) {
     const user = users[i];
 
     try {
       if (isValidImageUrl) {
-        // WebP formatidaligini tekshiramiz
         const isWebp = cleanUrl.toLowerCase().includes(".webp");
-
-        // WebP bo'lsa sendDocument, boshqa formatlar (jpg, png) uchun sendPhoto
         const endpoint = isWebp ? "sendDocument" : "sendPhoto";
         const payloadKey = isWebp ? "document" : "photo";
 
@@ -34,16 +45,17 @@ export async function sendBroadcast(users, messageText, imageUrl, onProgress) {
             [payloadKey]: cleanUrl,
             caption: messageText,
             parse_mode: "HTML",
+            reply_markup: replyMarkup,
           }
         );
       } else {
-        // Oddiy matn
         await axios.post(
           `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
           {
             chat_id: user.telegramId,
             text: messageText,
             parse_mode: "HTML",
+            reply_markup: replyMarkup,
           }
         );
       }
@@ -70,8 +82,10 @@ export async function sendBroadcast(users, messageText, imageUrl, onProgress) {
 }
 
 //
+
 //
 
+//
 // import axios from "axios";
 
 // const BOT_TOKEN = "8911264991:AAFCfdZdZmZPsLx_oNpfsxC4bKqoeX2IdDA";
@@ -85,7 +99,6 @@ export async function sendBroadcast(users, messageText, imageUrl, onProgress) {
 //   let successCount = 0;
 //   let failCount = 0;
 
-//   // Link rostdan ham rasm fayliga olib borishini tekshirish
 //   const cleanUrl = typeof imageUrl === "string" ? imageUrl.trim() : "";
 //   const isValidImageUrl =
 //     cleanUrl.startsWith("http://") || cleanUrl.startsWith("https://");
@@ -95,15 +108,24 @@ export async function sendBroadcast(users, messageText, imageUrl, onProgress) {
 
 //     try {
 //       if (isValidImageUrl) {
-//         // Rasm va tagida matn yuborish
-//         await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-//           chat_id: user.telegramId,
-//           photo: cleanUrl,
-//           caption: messageText,
-//           parse_mode: "HTML",
-//         });
+//         // WebP formatidaligini tekshiramiz
+//         const isWebp = cleanUrl.toLowerCase().includes(".webp");
+
+//         // WebP bo'lsa sendDocument, boshqa formatlar (jpg, png) uchun sendPhoto
+//         const endpoint = isWebp ? "sendDocument" : "sendPhoto";
+//         const payloadKey = isWebp ? "document" : "photo";
+
+//         await axios.post(
+//           `https://api.telegram.org/bot${BOT_TOKEN}/${endpoint}`,
+//           {
+//             chat_id: user.telegramId,
+//             [payloadKey]: cleanUrl,
+//             caption: messageText,
+//             parse_mode: "HTML",
+//           }
+//         );
 //       } else {
-//         // Faqat matn yuborish
+//         // Oddiy matn
 //         await axios.post(
 //           `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
 //           {
@@ -115,34 +137,12 @@ export async function sendBroadcast(users, messageText, imageUrl, onProgress) {
 //       }
 //       successCount += 1;
 //     } catch (error) {
-//       // Agar sendPhoto xato bersa (masalan link noto'g'ri bo'lsa), zaxira sifatida oddiy text yuborib ko'ramiz
-//       if (isValidImageUrl) {
-//         try {
-//           await axios.post(
-//             `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
-//             {
-//               chat_id: user.telegramId,
-//               text: messageText,
-//               parse_mode: "HTML",
-//             }
-//           );
-//           successCount += 1;
-//         } catch (fallbackError) {
-//           console.warn(
-//             "Xabar yuborilmadi:",
-//             user.telegramId,
-//             fallbackError?.response?.data?.description
-//           );
-//           failCount += 1;
-//         }
-//       } else {
-//         console.warn(
-//           "Xabar yuborilmadi:",
-//           user.telegramId,
-//           error?.response?.data?.description
-//         );
-//         failCount += 1;
-//       }
+//       console.warn(
+//         "Xabar yuborilmadi:",
+//         user.telegramId,
+//         error?.response?.data?.description || error.message
+//       );
+//       failCount += 1;
 //     }
 
 //     if (onProgress) {
