@@ -2,9 +2,14 @@ import React, { useEffect, useState } from "react";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { LuUsers, LuLock, LuSend, LuImage } from "react-icons/lu";
+import { FiUploadCloud } from "react-icons/fi";
+import { FaCheckCircle } from "react-icons/fa";
 import { sendBroadcast } from "../broadcastMessage";
+import axios from "axios";
 
 const ADMIN_PIN = "2026avtotek";
+// ImgBB API Key o'rnatildi
+const IMGBB_API_KEY = "0bf75dea880937d78cf5e554ed16a2e1";
 
 const Admin = () => {
   const [authorized, setAuthorized] = useState(false);
@@ -14,14 +19,39 @@ const Admin = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // =========================================================
-  // XABAR YUBORISH (BROADCAST)
-  // =========================================================
+  // BROADCAST STATE'LARI
   const [broadcastText, setBroadcastText] = useState("");
-  const [imageUrl, setImageUrl] = useState(""); // Rasm URL uchun state
+  const [imageUrl, setImageUrl] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [sending, setSending] = useState(false);
   const [progress, setProgress] = useState({ sent: 0, total: 0 });
   const [broadcastResult, setBroadcastResult] = useState(null);
+
+  // Rasm faylini ImgBB'ga yuklash
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const response = await axios.post(
+        `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
+        formData
+      );
+      if (response.data && response.data.data) {
+        // Original sifatli rasm linkini olamiz
+        setImageUrl(response.data.data.url);
+      }
+    } catch (error) {
+      console.error("Rasm yuklashda xatolik:", error);
+      alert("Rasm yuklashda xatolik yuz berdi.");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const handleSendBroadcast = async () => {
     if (!broadcastText.trim() || users.length === 0 || sending) return;
@@ -140,27 +170,75 @@ const Admin = () => {
 
       {/* BROADCAST BOX */}
       <div className="bg-white rounded-2xl p-4 border border-slate-100 mb-6">
-        <div className="flex items-center gap-1.5 mb-2">
+        <div className="flex items-center gap-1.5 mb-3">
           <LuSend size={16} className="text-blue-600" />
           <span className="text-sm font-bold text-slate-900">
             Hammaga xabar yuborish
           </span>
         </div>
 
-        {/* Rasm URL Inputi */}
-        <div className="flex items-center gap-2 mb-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
-          <LuImage size={18} className="text-slate-400 shrink-0" />
-          <input
-            type="url"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            placeholder="Rasm havolasi (masalan ImgBB linki) - Ixtiyoriy"
-            disabled={sending}
-            className="w-full text-sm bg-transparent outline-none text-slate-900 placeholder:text-slate-400"
-          />
+        {/* Fayl yuklash va URL kiritish bo'limi */}
+        <div className="space-y-2 mb-3">
+          <div className="flex items-center gap-2">
+            <label className="flex-1 flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium py-2.5 px-3 rounded-xl cursor-pointer transition-colors border border-dashed border-slate-300">
+              <FiUploadCloud size={16} />
+              <span>
+                {uploadingImage
+                  ? "Rasm yuklanmoqda..."
+                  : "Rasmni qurilmadan tanlash"}
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={uploadingImage || sending}
+                className="hidden"
+              />
+            </label>
+          </div>
+
+          {/* Tanlangan rasm ko'rinishi */}
+          {imageUrl && (
+            <div className="relative flex items-center gap-2 p-2 bg-blue-50 border border-blue-100 rounded-xl">
+              <img
+                src={imageUrl}
+                alt="Preview"
+                className="w-10 h-10 object-cover rounded-lg"
+              />
+              <div className="flex-1 min-w-0 text-xs text-blue-900 truncate">
+                Rasm tayyor! (Sifatli yuklandi)
+              </div>
+              <FaCheckCircle
+                className="text-blue-600 shrink-0 mr-1"
+                size={18}
+              />
+              <button
+                type="button"
+                onClick={() => setImageUrl("")}
+                className="text-xs text-rose-500 font-bold px-1"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
+          {/* Qo'lda URL kiritish */}
+          {!imageUrl && (
+            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+              <LuImage size={18} className="text-slate-400 shrink-0" />
+              <input
+                type="url"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                placeholder="Yoki rasm URL havolasini kiriting"
+                disabled={sending || uploadingImage}
+                className="w-full text-xs bg-transparent outline-none text-slate-900 placeholder:text-slate-400"
+              />
+            </div>
+          )}
         </div>
 
-        {/* Textarea */}
+        {/* Matn maydoni */}
         <textarea
           value={broadcastText}
           onChange={(e) => setBroadcastText(e.target.value)}
@@ -173,7 +251,12 @@ const Admin = () => {
         <button
           type="button"
           onClick={handleSendBroadcast}
-          disabled={sending || !broadcastText.trim() || users.length === 0}
+          disabled={
+            sending ||
+            uploadingImage ||
+            !broadcastText.trim() ||
+            users.length === 0
+          }
           className="w-full py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold disabled:opacity-40 active:scale-98 transition-transform"
         >
           {sending
@@ -251,15 +334,18 @@ const Admin = () => {
 
 export default Admin;
 
+//
+
+//
+
+//
+
 // import React, { useEffect, useState } from "react";
 // import { collection, getDocs, orderBy, query } from "firebase/firestore";
 // import { db } from "../firebaseConfig";
-// import { LuUsers, LuLock, LuSend } from "react-icons/lu";
+// import { LuUsers, LuLock, LuSend, LuImage } from "react-icons/lu";
 // import { sendBroadcast } from "../broadcastMessage";
 
-// // Admin sahifasiga kirish uchun oddiy parol (kod ichida saqlanadi —
-// // bu jiddiy xavfsizlik emas, faqat oddiy foydalanuvchilar tasodifan
-// // kirib qolmasligi uchun).
 // const ADMIN_PIN = "2026avtotek";
 
 // const Admin = () => {
@@ -274,6 +360,7 @@ export default Admin;
 //   // XABAR YUBORISH (BROADCAST)
 //   // =========================================================
 //   const [broadcastText, setBroadcastText] = useState("");
+//   const [imageUrl, setImageUrl] = useState(""); // Rasm URL uchun state
 //   const [sending, setSending] = useState(false);
 //   const [progress, setProgress] = useState({ sent: 0, total: 0 });
 //   const [broadcastResult, setBroadcastResult] = useState(null);
@@ -288,6 +375,7 @@ export default Admin;
 //     const result = await sendBroadcast(
 //       users,
 //       broadcastText.trim(),
+//       imageUrl,
 //       (sent, total) => {
 //         setProgress({ sent, total });
 //       }
@@ -296,11 +384,9 @@ export default Admin;
 //     setBroadcastResult(result);
 //     setSending(false);
 //     setBroadcastText("");
+//     setImageUrl("");
 //   };
 
-//   // =========================================================
-//   // PAROLNI TEKSHIRISH
-//   // =========================================================
 //   const handlePinSubmit = (e) => {
 //     e.preventDefault();
 //     if (pinInput === ADMIN_PIN) {
@@ -311,9 +397,6 @@ export default Admin;
 //     }
 //   };
 
-//   // =========================================================
-//   // FOYDALANUVCHILARNI FIRESTORE'DAN OLISH
-//   // =========================================================
 //   useEffect(() => {
 //     if (!authorized) return;
 
@@ -340,17 +423,11 @@ export default Admin;
 //     loadUsers();
 //   }, [authorized]);
 
-//   // =========================================================
-//   // FIRESTORE TIMESTAMP'NI O'QILADIGAN SANAGA AYLANTIRISH
-//   // =========================================================
 //   const formatDate = (timestamp) => {
 //     if (!timestamp?.toDate) return "-";
 //     return timestamp.toDate().toLocaleString("ru-RU");
 //   };
 
-//   // =========================================================
-//   // PAROL SO'RASH OYNASI
-//   // =========================================================
 //   if (!authorized) {
 //     return (
 //       <div className="min-h-screen flex items-center justify-center px-6 bg-slate-50">
@@ -392,9 +469,6 @@ export default Admin;
 //     );
 //   }
 
-//   // =========================================================
-//   // ADMIN PANEL
-//   // =========================================================
 //   return (
 //     <div className="min-h-screen bg-slate-50 px-4 py-6 pb-20">
 //       <div className="flex items-center gap-2 mb-1">
@@ -406,9 +480,7 @@ export default Admin;
 //         ta foydalanuvchi
 //       </p>
 
-//       {/* ===================================================
-//           XABAR YUBORISH (BROADCAST)
-//       ==================================================== */}
+//       {/* BROADCAST BOX */}
 //       <div className="bg-white rounded-2xl p-4 border border-slate-100 mb-6">
 //         <div className="flex items-center gap-1.5 mb-2">
 //           <LuSend size={16} className="text-blue-600" />
@@ -416,6 +488,21 @@ export default Admin;
 //             Hammaga xabar yuborish
 //           </span>
 //         </div>
+
+//         {/* Rasm URL Inputi */}
+//         <div className="flex items-center gap-2 mb-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+//           <LuImage size={18} className="text-slate-400 shrink-0" />
+//           <input
+//             type="url"
+//             value={imageUrl}
+//             onChange={(e) => setImageUrl(e.target.value)}
+//             placeholder="Rasm havolasi (masalan ImgBB linki) - Ixtiyoriy"
+//             disabled={sending}
+//             className="w-full text-sm bg-transparent outline-none text-slate-900 placeholder:text-slate-400"
+//           />
+//         </div>
+
+//         {/* Textarea */}
 //         <textarea
 //           value={broadcastText}
 //           onChange={(e) => setBroadcastText(e.target.value)}
@@ -424,6 +511,7 @@ export default Admin;
 //           disabled={sending}
 //           className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 resize-none mb-2 disabled:opacity-60"
 //         />
+
 //         <button
 //           type="button"
 //           onClick={handleSendBroadcast}
