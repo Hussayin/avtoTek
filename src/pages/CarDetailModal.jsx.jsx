@@ -166,7 +166,7 @@ const CarDetailModal = ({ car, onClose }) => {
 
   if (!car) return null;
 
-  // Instagram va YouTube havolalarini xavfsiz shaklda olish
+  // Instagram va YouTube havolalarini xavfsiz va aniq olish
   const instagramUrl = car.instagram || car.Instagram || "";
   const youtubeUrl = car.youtube || car.Youtube || car.YouTube || "";
 
@@ -276,7 +276,7 @@ const CarDetailModal = ({ car, onClose }) => {
               ${Number(car.price || 0).toLocaleString()}
             </div>
 
-            {/* INSTAGRAM VA YOUTUBE TUGMALARI */}
+            {/* INSTAGRAM VA YOUTUBE TEKSHIRUV TUGMALARI */}
             {(instagramUrl || youtubeUrl) && (
               <div className="flex gap-2 mb-5">
                 {instagramUrl && (
@@ -287,7 +287,7 @@ const CarDetailModal = ({ car, onClose }) => {
                     onClick={(e) => e.stopPropagation()}
                     className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 text-white text-xs font-semibold active:scale-95 transition-transform shadow-md cursor-pointer"
                   >
-                    <FaInstagram size={18} /> Tekshiruv (Instagram)
+                    <FaInstagram size={18} /> Instagram
                   </a>
                 )}
                 {youtubeUrl && (
@@ -298,7 +298,7 @@ const CarDetailModal = ({ car, onClose }) => {
                     onClick={(e) => e.stopPropagation()}
                     className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-red-600 text-white text-xs font-semibold active:scale-95 transition-transform shadow-md cursor-pointer"
                   >
-                    <FaYoutube size={18} /> Tekshiruv (Youtube)
+                    <FaYoutube size={18} /> Youtube
                   </a>
                 )}
               </div>
