@@ -42,13 +42,34 @@ function parseCarPost(text, messageId) {
     instagram: "",
     youtube: "",
     images: [],
+    status: "active", // Sukut bo'yicha e'lon faol bo'ladi
   };
 
   lines.forEach((line) => {
     const lower = line.toLowerCase();
 
-    // 1. Standart maydonlarni o'qish
-    if (lower.startsWith("id:")) {
+    // 1. HOLAT / STATUS TEKSHIRUVI
+    if (lower.startsWith("holat:") || lower.startsWith("status:")) {
+      const statusValue = line
+        .substring(line.indexOf(":") + 1)
+        .trim()
+        .toLowerCase();
+
+      if (
+        statusValue === "no-active" ||
+        statusValue === "noactive" ||
+        statusValue === "sotildi" ||
+        statusValue === "inactive" ||
+        statusValue === "no active"
+      ) {
+        carData.status = "no-active";
+      } else {
+        carData.status = "active";
+      }
+    }
+
+    // 2. STANDART MAYDONLARNI O'QISH
+    else if (lower.startsWith("id:")) {
       carData.listingId = line.replace(/^id:/i, "").trim();
     } else if (lower.startsWith("nomi:")) {
       carData.name = line.replace(/^nomi:/i, "").trim();
@@ -76,7 +97,7 @@ function parseCarPost(text, messageId) {
       carData.description = line.replace(/^tavsif:/i, "").trim();
     }
 
-    // 2. Rasmlarni aniqlash
+    // 3. RASMLAR LINKINI OLISH
     if (/^rasm\d*:/i.test(lower)) {
       const imgUrl = line.substring(line.indexOf(":") + 1).trim();
       if (imgUrl.startsWith("http")) {
@@ -84,13 +105,22 @@ function parseCarPost(text, messageId) {
       }
     }
 
-    // 3. Instagram va Youtube havolalarini KAFOLATLANGAN aniqlash (REGEX / Search)
-    if (lower.includes("instagram.com")) {
+    // 4. INSTAGRAM VA YOUTUBE HAVOLALARI
+    if (lower.startsWith("instagram:")) {
+      const url = line.substring(line.indexOf(":") + 1).trim();
+      if (url.startsWith("http")) carData.instagram = url;
+    } else if (lower.includes("instagram.com") && !carData.instagram) {
       const match = line.match(/(https?:\/\/[^\s]+)/g);
       if (match && match[0]) carData.instagram = match[0].trim();
     }
 
-    if (lower.includes("youtube.com") || lower.includes("youtu.be")) {
+    if (lower.startsWith("youtube:")) {
+      const url = line.substring(line.indexOf(":") + 1).trim();
+      if (url.startsWith("http")) carData.youtube = url;
+    } else if (
+      (lower.includes("youtube.com") || lower.includes("youtu.be")) &&
+      !carData.youtube
+    ) {
       const match = line.match(/(https?:\/\/[^\s]+)/g);
       if (match && match[0]) carData.youtube = match[0].trim();
     }
@@ -106,7 +136,7 @@ bot.on(["message", "channel_post", "edited_channel_post"], async (ctx) => {
     const post = ctx.channelPost || ctx.editedChannelPost || ctx.message;
     const text = post.text || post.caption || "";
 
-    console.log(`📩 Yangi xabar keldi (ID: ${post.message_id})`);
+    console.log(`📩 Yangi/Tahrirlangan xabar keldi (ID: ${post.message_id})`);
 
     const carData = parseCarPost(text, post.message_id);
 
@@ -121,11 +151,9 @@ bot.on(["message", "channel_post", "edited_channel_post"], async (ctx) => {
       .set(carData, { merge: true });
 
     console.log(`✅ Firestore'ga saqlandi: post_${post.message_id}`);
-    console.log(
-      "📸 Topilgan Instagram link:",
-      carData.instagram || "TOPILMADI"
-    );
-    console.log("🎥 Topilgan Youtube link:", carData.youtube || "TOPILMADI");
+    console.log(`📌 E'lon Holati: [ ${carData.status.toUpperCase()} ]`);
+    console.log("📸 Instagram link:", carData.instagram || "Mavjud emas");
+    console.log("🎥 Youtube link:", carData.youtube || "Mavjud emas");
   } catch (error) {
     console.error("❌ Firestore-ga yozishda xato:", error);
   }

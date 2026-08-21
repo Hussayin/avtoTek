@@ -6,10 +6,22 @@ import CarCard from "./CarCard";
 import { LuRefreshCw } from "react-icons/lu";
 import { useCars } from "./UseCars";
 
-// Sanani (dd.mm.yyyy) Date obyektiga aylantirish
+// Sanani Date obyektiga aylantirish
 function parseListingDate(dateStr) {
   if (!dateStr) return null;
-  const parts = dateStr.split(".");
+
+  const lowerStr = dateStr.toString().trim().toLowerCase();
+
+  // Agar matn "bugun" yoki "kecha" bo'lsa
+  if (lowerStr === "bugun") return new Date();
+  if (lowerStr === "kecha") {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return d;
+  }
+
+  // "14.08.2026" ko'rinishidagi sanalarni parse qilish
+  const parts = lowerStr.split(".");
   if (parts.length !== 3) return null;
 
   const [day, month, year] = parts.map((p) => parseInt(p, 10));
@@ -40,7 +52,7 @@ function isTodayOrYesterday(dateStr) {
 const Home = () => {
   const { cars, loading, refreshing, refresh } = useCars();
 
-  // Faqat bugungi va kechagi e'lonlar
+  // Faqat bugungi va kechagi active e'lonlar
   const todaysCars = cars.filter((car) => isTodayOrYesterday(car.date));
 
   return (
