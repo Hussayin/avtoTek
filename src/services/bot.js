@@ -47,6 +47,7 @@ function parseCarPost(text, messageId) {
   lines.forEach((line) => {
     const lower = line.toLowerCase();
 
+    // 1. Standart maydonlarni o'qish
     if (lower.startsWith("id:")) {
       carData.listingId = line.replace(/^id:/i, "").trim();
     } else if (lower.startsWith("nomi:")) {
@@ -73,19 +74,25 @@ function parseCarPost(text, messageId) {
       carData.date = line.replace(/^sana:/i, "").trim();
     } else if (lower.startsWith("tavsif:")) {
       carData.description = line.replace(/^tavsif:/i, "").trim();
-    } else if (lower.startsWith("instagram:")) {
-      // Instagram: so'zidan keyingi butun URL'ni to'g'ridan-to'g'ri oladi
-      const link = line.substring(line.indexOf(":") + 1).trim();
-      if (link.startsWith("http")) carData.instagram = link;
-    } else if (lower.startsWith("youtube:")) {
-      // Youtube: so'zidan keyingi butun URL'ni to'g'ridan-to'g'ri oladi
-      const link = line.substring(line.indexOf(":") + 1).trim();
-      if (link.startsWith("http")) carData.youtube = link;
-    } else if (/^rasm\d*:/i.test(lower)) {
+    }
+
+    // 2. Rasmlarni aniqlash
+    if (/^rasm\d*:/i.test(lower)) {
       const imgUrl = line.substring(line.indexOf(":") + 1).trim();
       if (imgUrl.startsWith("http")) {
         carData.images.push(imgUrl);
       }
+    }
+
+    // 3. Instagram va Youtube havolalarini KAFOLATLANGAN aniqlash (REGEX / Search)
+    if (lower.includes("instagram.com")) {
+      const match = line.match(/(https?:\/\/[^\s]+)/g);
+      if (match && match[0]) carData.instagram = match[0].trim();
+    }
+
+    if (lower.includes("youtube.com") || lower.includes("youtu.be")) {
+      const match = line.match(/(https?:\/\/[^\s]+)/g);
+      if (match && match[0]) carData.youtube = match[0].trim();
     }
   });
 
@@ -114,8 +121,11 @@ bot.on(["message", "channel_post", "edited_channel_post"], async (ctx) => {
       .set(carData, { merge: true });
 
     console.log(`✅ Firestore'ga saqlandi: post_${post.message_id}`);
-    console.log("📸 Saqlangan Instagram havola:", carData.instagram);
-    console.log("🎥 Saqlangan Youtube havola:", carData.youtube);
+    console.log(
+      "📸 Topilgan Instagram link:",
+      carData.instagram || "TOPILMADI"
+    );
+    console.log("🎥 Topilgan Youtube link:", carData.youtube || "TOPILMADI");
   } catch (error) {
     console.error("❌ Firestore-ga yozishda xato:", error);
   }

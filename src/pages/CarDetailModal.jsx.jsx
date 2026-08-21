@@ -166,6 +166,10 @@ const CarDetailModal = ({ car, onClose }) => {
 
   if (!car) return null;
 
+  // Instagram va YouTube havolalarini xavfsiz shaklda olish
+  const instagramUrl = car.instagram || car.Instagram || "";
+  const youtubeUrl = car.youtube || car.Youtube || car.YouTube || "";
+
   const goNext = () => setActiveIndex((prev) => (prev + 1) % images.length);
   const goPrev = () =>
     setActiveIndex((prev) => (prev - 1 + images.length) % images.length);
@@ -273,26 +277,28 @@ const CarDetailModal = ({ car, onClose }) => {
             </div>
 
             {/* INSTAGRAM VA YOUTUBE TUGMALARI */}
-            {(car.instagram || car.youtube) && (
+            {(instagramUrl || youtubeUrl) && (
               <div className="flex gap-2 mb-5">
-                {car.instagram && (
+                {instagramUrl && (
                   <a
-                    href={car.instagram}
+                    href={instagramUrl}
                     target="_blank"
-                    rel="noreferrer"
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 text-white text-xs font-semibold active:scale-95 transition-transform shadow-sm"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 text-white text-xs font-semibold active:scale-95 transition-transform shadow-md cursor-pointer"
                   >
-                    <FaInstagram size={16} /> Tekshiruv (Instagram)
+                    <FaInstagram size={18} /> Tekshiruv (Instagram)
                   </a>
                 )}
-                {car.youtube && (
+                {youtubeUrl && (
                   <a
-                    href={car.youtube}
+                    href={youtubeUrl}
                     target="_blank"
-                    rel="noreferrer"
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl bg-red-600 text-white text-xs font-semibold active:scale-95 transition-transform shadow-sm"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-red-600 text-white text-xs font-semibold active:scale-95 transition-transform shadow-md cursor-pointer"
                   >
-                    <FaYoutube size={16} /> Tekshiruv (Youtube)
+                    <FaYoutube size={18} /> Tekshiruv (Youtube)
                   </a>
                 )}
               </div>
