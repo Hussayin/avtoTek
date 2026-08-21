@@ -27,6 +27,7 @@ function parseCarPost(text, messageId) {
     messageId: messageId,
     createdAt: new Date(),
     name: "",
+    listingId: "",
     price: 0,
     year: 2024,
     mileage: 0,
@@ -46,50 +47,44 @@ function parseCarPost(text, messageId) {
   lines.forEach((line) => {
     const lower = line.toLowerCase();
 
-    if (lower.startsWith("nomi:"))
+    if (lower.startsWith("id:")) {
+      carData.listingId = line.replace(/^id:/i, "").trim();
+    } else if (lower.startsWith("nomi:")) {
       carData.name = line.replace(/^nomi:/i, "").trim();
-    else if (lower.startsWith("vin:"))
+    } else if (lower.startsWith("vin:")) {
       carData.vin = line.replace(/^vin:/i, "").trim();
-    else if (lower.startsWith("narxi:"))
+    } else if (lower.startsWith("narxi:")) {
       carData.price = parseInt(line.replace(/[^\d]/g, ""), 10) || 0;
-    else if (lower.startsWith("yili:"))
+    } else if (lower.startsWith("yili:")) {
       carData.year = parseInt(line.replace(/[^\d]/g, ""), 10) || 2024;
-    else if (lower.startsWith("probeg:"))
+    } else if (lower.startsWith("probeg:")) {
       carData.mileage = parseInt(line.replace(/[^\d]/g, ""), 10) || 0;
-    else if (lower.startsWith("korobka:"))
+    } else if (lower.startsWith("korobka:")) {
       carData.gearbox = line.replace(/^korobka:/i, "").trim();
-    else if (lower.startsWith("rangi:"))
+    } else if (lower.startsWith("rangi:")) {
       carData.color = line.replace(/^rangi:/i, "").trim();
-    else if (lower.startsWith("motor:"))
+    } else if (lower.startsWith("motor:")) {
       carData.engine = line.replace(/^motor:/i, "").trim();
-    else if (lower.startsWith("yoqilgi:") || lower.startsWith("yoqilg'i:"))
+    } else if (lower.startsWith("yoqilgi:") || lower.startsWith("yoqilg'i:")) {
       carData.fuel = line.replace(/^yoqilg'?i:/i, "").trim();
-    else if (lower.startsWith("joy:"))
+    } else if (lower.startsWith("joy:")) {
       carData.location = line.replace(/^joy:/i, "").trim();
-    else if (lower.startsWith("sana:"))
+    } else if (lower.startsWith("sana:")) {
       carData.date = line.replace(/^sana:/i, "").trim();
-    else if (lower.startsWith("tavsif:"))
+    } else if (lower.startsWith("tavsif:")) {
       carData.description = line.replace(/^tavsif:/i, "").trim();
-    else if (lower.startsWith("instagram:")) {
-      const link = line.replace(/^instagram:/i, "").trim();
+    } else if (lower.startsWith("instagram:")) {
+      // Instagram: so'zidan keyingi butun URL'ni to'g'ridan-to'g'ri oladi
+      const link = line.substring(line.indexOf(":") + 1).trim();
       if (link.startsWith("http")) carData.instagram = link;
     } else if (lower.startsWith("youtube:")) {
-      const link = line.replace(/^youtube:/i, "").trim();
+      // Youtube: so'zidan keyingi butun URL'ni to'g'ridan-to'g'ri oladi
+      const link = line.substring(line.indexOf(":") + 1).trim();
       if (link.startsWith("http")) carData.youtube = link;
     } else if (/^rasm\d*:/i.test(lower)) {
-      const imgUrl = line.replace(/^rasm\d*:/i, "").trim();
+      const imgUrl = line.substring(line.indexOf(":") + 1).trim();
       if (imgUrl.startsWith("http")) {
         carData.images.push(imgUrl);
-      }
-    } else {
-      // Kalit so'zsiz qo'yilgan bo'lsa ham avtomatik aniqlash
-      if (lower.includes("instagram.com/") && line.startsWith("http")) {
-        carData.instagram = line.trim();
-      } else if (
-        (lower.includes("youtube.com/") || lower.includes("youtu.be/")) &&
-        line.startsWith("http")
-      ) {
-        carData.youtube = line.trim();
       }
     }
   });
@@ -119,6 +114,8 @@ bot.on(["message", "channel_post", "edited_channel_post"], async (ctx) => {
       .set(carData, { merge: true });
 
     console.log(`✅ Firestore'ga saqlandi: post_${post.message_id}`);
+    console.log("📸 Saqlangan Instagram havola:", carData.instagram);
+    console.log("🎥 Saqlangan Youtube havola:", carData.youtube);
   } catch (error) {
     console.error("❌ Firestore-ga yozishda xato:", error);
   }
