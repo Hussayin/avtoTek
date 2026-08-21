@@ -4,7 +4,6 @@ import { getFirestore } from "firebase-admin/firestore";
 import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
-// Endi fayl bir xil papkada bo'lgani uchun yo'li to'g'ri ishlaydi:
 const serviceAccount = require("./serviceAccountKey.json");
 
 initializeApp({
@@ -38,6 +37,9 @@ function parseCarPost(text, messageId) {
     location: "Toshkent sh.",
     date: new Date().toLocaleDateString("ru-RU"),
     description: "",
+    vin: "-",
+    instagram: "",
+    youtube: "",
     images: [],
   };
 
@@ -46,6 +48,8 @@ function parseCarPost(text, messageId) {
 
     if (lower.startsWith("nomi:"))
       carData.name = line.replace(/^nomi:/i, "").trim();
+    else if (lower.startsWith("vin:"))
+      carData.vin = line.replace(/^vin:/i, "").trim();
     else if (lower.startsWith("narxi:"))
       carData.price = parseInt(line.replace(/[^\d]/g, ""), 10) || 0;
     else if (lower.startsWith("yili:"))
@@ -66,10 +70,26 @@ function parseCarPost(text, messageId) {
       carData.date = line.replace(/^sana:/i, "").trim();
     else if (lower.startsWith("tavsif:"))
       carData.description = line.replace(/^tavsif:/i, "").trim();
-    else if (/^rasm\d*:/i.test(lower)) {
+    else if (lower.startsWith("instagram:")) {
+      const link = line.replace(/^instagram:/i, "").trim();
+      if (link.startsWith("http")) carData.instagram = link;
+    } else if (lower.startsWith("youtube:")) {
+      const link = line.replace(/^youtube:/i, "").trim();
+      if (link.startsWith("http")) carData.youtube = link;
+    } else if (/^rasm\d*:/i.test(lower)) {
       const imgUrl = line.replace(/^rasm\d*:/i, "").trim();
       if (imgUrl.startsWith("http")) {
         carData.images.push(imgUrl);
+      }
+    } else {
+      // Kalit so'zsiz qo'yilgan bo'lsa ham avtomatik aniqlash
+      if (lower.includes("instagram.com/") && line.startsWith("http")) {
+        carData.instagram = line.trim();
+      } else if (
+        (lower.includes("youtube.com/") || lower.includes("youtu.be/")) &&
+        line.startsWith("http")
+      ) {
+        carData.youtube = line.trim();
       }
     }
   });

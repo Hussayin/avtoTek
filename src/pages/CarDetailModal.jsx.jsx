@@ -14,22 +14,14 @@ import {
 } from "react-icons/lu";
 import { FaInstagram, FaYoutube } from "react-icons/fa";
 
-// =============================================================
-// Kelajakda qo'shiladigan (hozircha Telegram postida bo'lmagan)
-// maydonlar. Qiymati bo'lmasa "Kiritilmagan" deb chiqadi.
-// =============================================================
-
 const FUTURE_FIELDS = [
   { key: "bodyType", label: "Kuzov turi" },
   { key: "certificateNo", label: "Sertifikat raqami" },
   { key: "ownersCount", label: "Egasi soni" },
 ];
 
-// =============================================================
-// Statistika chipi — Yili, Probeg, Korobka va h.k.
-// =============================================================
 const StatChip = ({ icon: Icon, label, value }) => {
-  const hasValue = value && value !== "";
+  const hasValue = value && value !== "" && value !== "-";
   return (
     <div className="bg-white rounded-2xl p-3 flex flex-col gap-1.5 min-w-0">
       <div className="flex items-center gap-1.5 text-slate-400">
@@ -49,9 +41,6 @@ const StatChip = ({ icon: Icon, label, value }) => {
   );
 };
 
-// =============================================================
-// TO'LIQ EKRAN RASM GALEREYASI (lightbox)
-// =============================================================
 const FullscreenGallery = ({ images, startIndex, onClose }) => {
   const [index, setIndex] = useState(startIndex);
 
@@ -92,7 +81,6 @@ const FullscreenGallery = ({ images, startIndex, onClose }) => {
         />
       </motion.div>
 
-      {/* Yopish */}
       <button
         onClick={onClose}
         className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform"
@@ -100,14 +88,12 @@ const FullscreenGallery = ({ images, startIndex, onClose }) => {
         <LuX size={20} />
       </button>
 
-      {/* Hisoblagich */}
       {images.length > 1 && (
         <div className="absolute top-5 left-5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-white text-xs font-semibold">
           {index + 1} / {images.length}
         </div>
       )}
 
-      {/* Oldinga / Orqaga */}
       {images.length > 1 && (
         <>
           <button
@@ -131,7 +117,6 @@ const FullscreenGallery = ({ images, startIndex, onClose }) => {
         </>
       )}
 
-      {/* Nuqtachalar */}
       {images.length > 1 && (
         <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-1.5">
           {images.map((_, i) => (
@@ -159,13 +144,6 @@ const CarDetailModal = ({ car, onClose }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [showGallery, setShowGallery] = useState(false);
 
-  // =========================================================
-  // ORQADAGI SAHIFANI SCROLL QILDIRMASLIK
-  //
-  // Modal ochiq turgan payt <body> ni qulflaymiz, aks holda
-  // modal ichida scroll qilinganda orqadagi sahifa ham
-  // birga scroll bo'lib ketadi (ayniqsa mobil brauzerlarda).
-  // =========================================================
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
     const originalPosition = document.body.style.position;
@@ -213,9 +191,7 @@ const CarDetailModal = ({ car, onClose }) => {
           exit={{ y: "6%", opacity: 0 }}
           transition={{ type: "spring", damping: 30, stiffness: 320 }}
         >
-          {/* =====================================================
-              RASMLAR SLAYDERI
-          ====================================================== */}
+          {/* RASMLAR SLAYDERI */}
           <div className="relative w-full h-[46vh] bg-slate-100 overflow-hidden">
             {images.length > 0 ? (
               <motion.div
@@ -239,10 +215,8 @@ const CarDetailModal = ({ car, onClose }) => {
               </div>
             )}
 
-            {/* Yuqoridan qorong'ulashtiruvchi gradient — tugmalar aniq ko'rinishi uchun */}
             <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-black/40 to-transparent pointer-events-none" />
 
-            {/* Yopish tugmasi */}
             <button
               type="button"
               onClick={onClose}
@@ -251,7 +225,6 @@ const CarDetailModal = ({ car, onClose }) => {
               <LuX size={20} />
             </button>
 
-            {/* To'liq ekran tugmasi */}
             {images.length > 0 && (
               <button
                 type="button"
@@ -262,14 +235,12 @@ const CarDetailModal = ({ car, onClose }) => {
               </button>
             )}
 
-            {/* Hisoblagich */}
             {images.length > 1 && (
               <div className="absolute bottom-4 right-4 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md text-white text-[11px] font-semibold">
                 {activeIndex + 1} / {images.length}
               </div>
             )}
 
-            {/* Nuqtachalar */}
             {images.length > 1 && (
               <div className="absolute bottom-4 left-4 flex gap-1.5">
                 {images.map((_, i) => (
@@ -285,9 +256,7 @@ const CarDetailModal = ({ car, onClose }) => {
             )}
           </div>
 
-          {/* =====================================================
-              ASOSIY MA'LUMOT
-          ====================================================== */}
+          {/* ASOSIY MA'LUMOT */}
           <div className="px-4 mb-[50px] pt-5 pb-10 -mt-4 bg-[#f8fafc] rounded-t-3xl relative">
             <div className="flex items-start justify-between gap-3 mb-1">
               <h2 className="text-xl font-bold text-slate-900 leading-tight">
@@ -303,7 +272,7 @@ const CarDetailModal = ({ car, onClose }) => {
               ${Number(car.price || 0).toLocaleString()}
             </div>
 
-            {/* Instagram / Youtube tugmalari */}
+            {/* INSTAGRAM VA YOUTUBE TUGMALARI */}
             {(car.instagram || car.youtube) && (
               <div className="flex gap-2 mb-5">
                 {car.instagram && (
@@ -313,7 +282,7 @@ const CarDetailModal = ({ car, onClose }) => {
                     rel="noreferrer"
                     className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 text-white text-xs font-semibold active:scale-95 transition-transform shadow-sm"
                   >
-                    <FaInstagram size={15} /> Tekshiruv (Instagram)
+                    <FaInstagram size={16} /> Tekshiruv (Instagram)
                   </a>
                 )}
                 {car.youtube && (
@@ -323,15 +292,13 @@ const CarDetailModal = ({ car, onClose }) => {
                     rel="noreferrer"
                     className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl bg-red-600 text-white text-xs font-semibold active:scale-95 transition-transform shadow-sm"
                   >
-                    <FaYoutube size={15} /> Tekshiruv (Youtube)
+                    <FaYoutube size={16} /> Tekshiruv (Youtube)
                   </a>
                 )}
               </div>
             )}
 
-            {/* =================================================
-                TEXNIK XUSUSIYATLAR — CHIP GRID
-            ================================================== */}
+            {/* TEXNIK XUSUSIYATLAR */}
             <div className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">
               Xususiyatlari
             </div>
@@ -357,9 +324,7 @@ const CarDetailModal = ({ car, onClose }) => {
               <StatChip icon={LuSettings2} label="VIN raqami" value={car.vin} />
             </div>
 
-            {/* =================================================
-                JOY VA SANA
-            ================================================== */}
+            {/* JOY VA SANA */}
             <div className="flex items-center justify-between text-sm text-slate-500 mb-5 px-1">
               <div className="flex items-center gap-1.5">
                 <LuMapPin size={16} className="text-slate-400" />
@@ -371,9 +336,7 @@ const CarDetailModal = ({ car, onClose }) => {
               </div>
             </div>
 
-            {/* =================================================
-                TAVSIF
-            ================================================== */}
+            {/* TAVSIF */}
             {car.description && (
               <div className="mb-5">
                 <div className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">
@@ -385,9 +348,7 @@ const CarDetailModal = ({ car, onClose }) => {
               </div>
             )}
 
-            {/* =================================================
-                KELAJAKDA QO'SHILADIGAN MAYDONLAR
-            ================================================== */}
+            {/* KELAJAKDA QO'SHILADIGAN MAYDONLAR */}
             <div className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">
               Qo'shimcha
             </div>
@@ -404,9 +365,7 @@ const CarDetailModal = ({ car, onClose }) => {
         </motion.div>
       </motion.div>
 
-      {/* =====================================================
-          TO'LIQ EKRAN GALEREYA
-      ====================================================== */}
+      {/* TO'LIQ EKRAN GALEREYA */}
       {showGallery && (
         <FullscreenGallery
           images={images}
