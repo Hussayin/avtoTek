@@ -1,49 +1,33 @@
-import { useEffect, useState } from "react";
-import { db } from "../firebaseConfig";
+import { useState, useEffect } from "react";
+import { db } from "../firebaseConfig"; // Firebase konfiguratsiyangiz yo'li
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 
 export function useCars() {
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
-
-    // Firestore'dagi 'cars' kolleksiyasini real vaqtda eshitish
-    const carsRef = collection(db, "cars");
-    const q = query(carsRef, orderBy("createdAt", "desc"));
+    // Firestore 'cars' kolleksiyasini real-vaqt rejimida eshitish
+    const q = query(collection(db, "cars"), orderBy("createdAt", "desc"));
 
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        const carList = [];
-        snapshot.forEach((doc) => {
-          carList.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        });
-
-        setCars(carList);
+        const carsData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setCars(carsData);
         setLoading(false);
-        setRefreshing(false);
       },
       (error) => {
-        console.error("Firebase Firestore yuklashda xatolik:", error);
+        console.error("Firestore xatosi:", error);
         setLoading(false);
-        setRefreshing(false);
       }
     );
 
     return () => unsubscribe();
   }, []);
 
-  const refresh = () => {
-    setRefreshing(true);
-    // Firestore realtime bo'lgani uchun, bu tugma indicator uchun ishlaydi
-    setTimeout(() => setRefreshing(false), 500);
-  };
-
-  return { cars, loading, refreshing, refresh };
+  return { cars, loading };
 }
