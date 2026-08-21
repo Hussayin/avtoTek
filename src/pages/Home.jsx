@@ -1,5 +1,4 @@
 import React from "react";
-
 import Navbar from "../comps/Navbar";
 import MenuBar from "./MenuBar";
 import SearchBar from "./SearchBar";
@@ -7,9 +6,7 @@ import CarCard from "./CarCard";
 import { LuRefreshCw } from "react-icons/lu";
 import { useCars } from "./UseCars";
 
-// =========================================================
-// SANANI (dd.mm.yyyy) Date obyektiga aylantirish
-// =========================================================
+// Sanani (dd.mm.yyyy) Date obyektiga aylantirish
 function parseListingDate(dateStr) {
   if (!dateStr) return null;
   const parts = dateStr.split(".");
@@ -21,9 +18,7 @@ function parseListingDate(dateStr) {
   return new Date(year, month - 1, day);
 }
 
-// =========================================================
-// E'LON BUGUNGI YOKI KECHAGI KUNGA TEGISHLIMI?
-// =========================================================
+// E'lon bugungi yoki kechagi kunga tegishlimi?
 function isTodayOrYesterday(dateStr) {
   const listingDate = parseListingDate(dateStr);
   if (!listingDate) return false;

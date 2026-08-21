@@ -1,5 +1,4 @@
 import React from "react";
-
 import Navbar from "../comps/Navbar";
 import SearchBar from "./SearchBar";
 import CarCard from "./CarCard";
@@ -7,9 +6,6 @@ import { LuRefreshCw } from "react-icons/lu";
 import { useCars } from "./UseCars";
 
 const Bozor = () => {
-  // Hamma mashinalar — filtrlarsiz. Fon rejimida avtomatik
-  // yangilanish (UseCars.jsx ichida sozlangan interval bilan)
-  // shu yerda ham ishlaydi.
   const { cars, loading, refreshing, refresh } = useCars();
 
   return (
@@ -26,9 +22,6 @@ const Bozor = () => {
             </p>
           </div>
 
-          {/* =================================================
-              QO'LDA YANGILASH TUGMASI
-          ================================================== */}
           <button
             type="button"
             onClick={refresh}
@@ -41,10 +34,6 @@ const Bozor = () => {
           </button>
         </div>
 
-        {/* ===================================================
-            LOADING — FAQAT BIRINCHI YUKLANISHDA
-        ==================================================== */}
-
         {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {[1, 2, 3, 4, 5, 6].map((n) => (
@@ -55,20 +44,12 @@ const Bozor = () => {
             ))}
           </div>
         ) : cars.length > 0 ? (
-          /* =================================================
-             CARDLAR — HAMMASI, FILTRLARSIZ
-          ================================================== */
-
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {cars.map((car) => (
               <CarCard key={car.id} car={car} />
             ))}
           </div>
         ) : (
-          /* =================================================
-             MA'LUMOT YO'Q
-          ================================================== */
-
           <div className="text-center py-10 text-slate-400 text-sm">
             Hozircha e'lonlar topilmadi.
           </div>

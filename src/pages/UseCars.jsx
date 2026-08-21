@@ -1,68 +1,48 @@
-import { useEffect, useRef, useState } from "react";
-import { fetchCarsFromTelegram } from "../services/telegramService";
+import { useEffect, useState } from "react";
+import { db } from "../firebaseConfig";
+import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 
-// Har necha millisekundda fon rejimida yangilanishi
-const AUTO_REFRESH_INTERVAL = 30000; // 30 soniya
-
-// =============================================================
-// Telegramdan mashinalar ro'yxatini olish + fon rejimida
-// avtomatik yangilanish + qo'lda yangilash imkoni.
-//
-// Home.jsx va LikedProduct.jsx ikkalasi ham shu hook'dan
-// foydalanadi, shunda fetch/polling logikasi bitta joyda turadi.
-// =============================================================
 export function useCars() {
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const hasLoadedOnce = useRef(false);
-
-  const load = async (silent = false) => {
-    try {
-      if (silent) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-
-      const telegramCars = await fetchCarsFromTelegram();
-
-      if (telegramCars.length === 0 && hasLoadedOnce.current) {
-        console.warn("Yangi ma'lumot 0 ta qaytdi — eski ma'lumot saqlanadi.");
-      } else {
-        setCars(telegramCars);
-        hasLoadedOnce.current = true;
-      }
-    } catch (error) {
-      console.error("Telegram avtomobillarini yuklashda xatolik:", error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
 
   useEffect(() => {
-    load(false);
+    setLoading(true);
 
-    const intervalId = setInterval(() => {
-      load(true);
-    }, AUTO_REFRESH_INTERVAL);
+    // Firestore'dagi 'cars' kolleksiyasini real vaqtda eshitish
+    const carsRef = collection(db, "cars");
+    const q = query(carsRef, orderBy("createdAt", "desc"));
 
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        load(true);
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const carList = [];
+        snapshot.forEach((doc) => {
+          carList.push({
+            id: doc.id,
+            ...doc.data(),
+          });
+        });
+
+        setCars(carList);
+        setLoading(false);
+        setRefreshing(false);
+      },
+      (error) => {
+        console.error("Firebase Firestore yuklashda xatolik:", error);
+        setLoading(false);
+        setRefreshing(false);
       }
-    };
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    );
 
-    return () => {
-      clearInterval(intervalId);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
+    return () => unsubscribe();
   }, []);
 
   const refresh = () => {
-    if (!refreshing) load(true);
+    setRefreshing(true);
+    // Firestore realtime bo'lgani uchun, bu tugma indicator uchun ishlaydi
+    setTimeout(() => setRefreshing(false), 500);
   };
 
   return { cars, loading, refreshing, refresh };
