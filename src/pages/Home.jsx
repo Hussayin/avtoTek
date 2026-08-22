@@ -1,18 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import Navbar from "../comps/Navbar";
 import MenuBar from "./MenuBar";
 import SearchBar from "./SearchBar";
 import CarCard from "./CarCard";
+import SearchModal from "./SearchModal";
+import FilterModal from "./FilterModal";
 import { LuRefreshCw } from "react-icons/lu";
 import { useCars } from "./UseCars";
 
-// Sanani Date obyektiga aylantirish
 function parseListingDate(dateStr) {
   if (!dateStr) return null;
-
   const lowerStr = dateStr.toString().trim().toLowerCase();
 
-  // Agar matn "bugun" yoki "kecha" bo'lsa
   if (lowerStr === "bugun") return new Date();
   if (lowerStr === "kecha") {
     const d = new Date();
@@ -20,7 +19,6 @@ function parseListingDate(dateStr) {
     return d;
   }
 
-  // "14.08.2026" ko'rinishidagi sanalarni parse qilish
   const parts = lowerStr.split(".");
   if (parts.length !== 3) return null;
 
@@ -30,7 +28,6 @@ function parseListingDate(dateStr) {
   return new Date(year, month - 1, day);
 }
 
-// E'lon bugungi yoki kechagi kunga tegishlimi?
 function isTodayOrYesterday(dateStr) {
   const listingDate = parseListingDate(dateStr);
   if (!listingDate) return false;
@@ -52,19 +49,25 @@ function isTodayOrYesterday(dateStr) {
 const Home = () => {
   const { cars, loading, refreshing, refresh } = useCars();
 
-  // Faqat bugungi va kechagi active e'lonlar
-  const todaysCars = cars.filter((car) => isTodayOrYesterday(car.date));
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const dailyCars = cars.filter((car) => isTodayOrYesterday(car.date));
 
   return (
     <div>
       <Navbar />
       <MenuBar />
-      <SearchBar />
+
+      <SearchBar
+        onOpenSearch={() => setIsSearchOpen(true)}
+        onOpenFilter={() => setIsFilterOpen(true)}
+      />
 
       <div className="px-3 mt-2 pb-20">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-bold text-slate-900">Kun takliflari</h2>
-
           <button
             type="button"
             onClick={refresh}
@@ -86,9 +89,9 @@ const Home = () => {
               />
             ))}
           </div>
-        ) : todaysCars.length > 0 ? (
+        ) : dailyCars.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-            {todaysCars.map((car) => (
+            {dailyCars.map((car) => (
               <CarCard key={car.id} car={car} />
             ))}
           </div>
@@ -98,6 +101,20 @@ const Home = () => {
           </div>
         )}
       </div>
+
+      <SearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        cars={cars}
+      />
+
+      <FilterModal
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        cars={cars}
+      />
     </div>
   );
 };
